@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Pet Leveling Hilfe</title>
-<meta name="description" content="Formular für Pet-Leveling-Anfragen – sendet an einen Discord-Webhook." />
 <style>
   :root {
     --bg-dark: #0a0a0a;
@@ -24,7 +23,6 @@
     background: var(--bg-dark);
     color: var(--text-dark);
     overflow: hidden;
-    position: relative;
   }
   canvas#bgCanvas {
     position: absolute;
@@ -34,41 +32,45 @@
   .card {
     position: relative;
     z-index: 1;
-    width: 100%;
-    max-width: 560px;
+    width: 90%;
+    max-width: 500px;
     background: var(--card-dark);
     border: 1px solid var(--border-dark);
     border-radius: 18px;
     box-shadow: var(--shadow-dark);
-    padding: 28px;
+    padding: 24px;
     transform-style: preserve-3d;
     transition: transform 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   h1 {
     text-align: center;
-    margin-bottom: 18px;
+    margin-bottom: 15px;
   }
   .subtitle {
     text-align: center;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
     color: var(--muted-dark);
     font-size: 14px;
   }
   label {
-    display: block;
     font-size: 13px;
     color: var(--muted-dark);
-    margin: 12px 2px 6px;
+    margin-bottom: 4px;
+    display: block;
   }
   input, textarea {
     width: 100%;
-    padding: 12px 14px;
-    border-radius: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
     border: 1px solid var(--border-dark);
     background: transparent;
     color: var(--text-dark);
-    font-size: 15px;
+    font-size: 14px;
     outline: none;
+    margin-bottom: 10px;
     transition: border-color .2s ease, box-shadow .2s ease;
   }
   input::placeholder, textarea::placeholder {
@@ -76,20 +78,19 @@
   }
   input:focus, textarea:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+    box-shadow: 0 0 8px rgba(255,255,255,0.3);
   }
-  textarea { min-height: 80px; resize: vertical; }
+  textarea { min-height: 60px; resize: vertical; }
   .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
   .btn {
     width: 100%;
-    margin-top: 18px;
-    padding: 12px 16px;
+    padding: 10px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--accent);
     color: #000;
     font-weight: bold;
@@ -98,11 +99,16 @@
   }
   .btn:hover { filter: brightness(0.9); }
   .btn:active { transform: translateY(1px); }
-  .status { margin-top: 12px; text-align: center; min-height: 22px; }
+  .status {
+    margin-top: 10px;
+    text-align: center;
+    min-height: 20px;
+    font-size: 13px;
+  }
   .ok { color: lightgreen; }
   .err { color: #ff5b6e; }
   .footer {
-    margin-top: 8px;
+    margin-top: 5px;
     text-align: center;
     font-size: 12px;
     color: var(--muted-dark);
@@ -135,11 +141,8 @@
       </div>
     </div>
 
-    <label for="offer">Was zahlst du? Was gibst du uns dafür?</label>
+    <label for="offer">Was gibst du fürs Leveln?</label>
     <input id="offer" name="offer" type="text" placeholder="..." required />
-
-    <label for="extra">Extra Kommentar</label>
-    <textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln..."></textarea>
 
     <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
     <div id="status" class="status" aria-live="polite"></div>
@@ -153,73 +156,65 @@ const WEBHOOK_USERNAME = "Pet Leveling Bot";
 const WEBHOOK_AVATAR = "";
 
 document.getElementById('y').textContent = new Date().getFullYear();
-const form = document.getElementById('levelForm');
-const btn = document.getElementById('sendBtn');
-const statusEl = document.getElementById('status');
 
 function getVal(id){ return (document.getElementById(id).value || "").trim(); }
 function buildPayload(){
-  const roblox = getVal('roblox');
-  const discord = getVal('discord');
-  const wanted = getVal('petWanted');
-  const current = getVal('petCurrent');
-  const target = getVal('targetLevel');
-  const offer  = getVal('offer');
-  const extra  = getVal('extra');
-  const embed = {
-    title: "Neue Pet Leveling Anfrage",
-    color: 0xaaaaaa,
-    fields: [
-      { name: "Roblox Name", value: roblox || "—" },
-      { name: "Discord Name", value: discord || "—" },
-      { name: "Pet (gewünscht)", value: wanted || "—" },
-      { name: "Pet (aktuell)", value: current || "—", inline: true },
-      { name: "Ziel-Level", value: target || "—", inline: true },
-      { name: "Gegenleistung", value: offer || "—" }
-    ],
-    timestamp: new Date().toISOString()
-  };
-  if (extra) embed.fields.push({ name: "Notizen", value: extra });
   return {
     username: WEBHOOK_USERNAME || undefined,
     avatar_url: WEBHOOK_AVATAR || undefined,
-    embeds: [embed]
+    embeds: [{
+      title: "Neue Pet Leveling Anfrage",
+      color: 0xaaaaaa,
+      fields: [
+        { name: "Roblox Name", value: getVal('roblox') || "—" },
+        { name: "Discord Name", value: getVal('discord') || "—" },
+        { name: "Pet (gewünscht)", value: getVal('petWanted') || "—" },
+        { name: "Pet (aktuell)", value: getVal('petCurrent') || "—", inline: true },
+        { name: "Ziel-Level", value: getVal('targetLevel') || "—", inline: true },
+        { name: "Gegenleistung", value: getVal('offer') || "—" }
+      ],
+      timestamp: new Date().toISOString()
+    }]
   };
 }
-function show(msg, ok=false){
-  statusEl.textContent = msg;
-  statusEl.className = 'status ' + (ok ? 'ok' : 'err');
-}
-form.addEventListener('submit', async (e) => {
+
+document.getElementById('levelForm').addEventListener('submit', async e => {
   e.preventDefault();
-  if (!WEBHOOK_URL || WEBHOOK_URL.includes("HIER_WEBHOOK_URL_EINFÜGEN")) {
-    show('Bitte Webhook-URL eintragen.', false);
+  const statusEl = document.getElementById('status');
+  const btn = document.getElementById('sendBtn');
+
+  if (!WEBHOOK_URL.includes("http")) {
+    statusEl.textContent = "Bitte Webhook-URL eintragen.";
+    statusEl.className = "status err";
     return;
   }
+
   btn.disabled = true;
-  show('Sende...', true);
+  statusEl.textContent = "Sende...";
+  statusEl.className = "status ok";
+
   try {
     const res = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(buildPayload())
     });
-    if (!res.ok) show('Fehler beim Senden ('+res.status+').', false);
-    else {
-      show('Anfrage gesendet! ✅', true);
-      form.reset();
-    }
-  } catch (err) {
-    show('Fehler: Anfrage blockiert oder Netzwerkproblem.', false);
+    if (!res.ok) throw new Error(res.status);
+    statusEl.textContent = "Anfrage gesendet! ✅";
+    statusEl.className = "status ok";
+    e.target.reset();
+  } catch {
+    statusEl.textContent = "Fehler beim Senden.";
+    statusEl.className = "status err";
   }
   btn.disabled = false;
 });
 
-// 3D Neige-Effekt
+// 3D Neige-Effekt (75% stärker)
 const card = document.getElementById('card');
 document.addEventListener('mousemove', e => {
-  const x = (e.clientX / window.innerWidth - 0.5) * 20; // max 20° seitlich
-  const y = -(e.clientY / window.innerHeight - 0.5) * 20; // max 20° hoch/runter
+  const x = (e.clientX / window.innerWidth - 0.5) * 35; // vorher 20
+  const y = -(e.clientY / window.innerHeight - 0.5) * 35; // vorher 20
   card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
 });
 document.addEventListener('mouseleave', () => {
