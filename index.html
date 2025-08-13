@@ -172,75 +172,116 @@ formCard.addEventListener('mouseenter', ()=>{ formCard.style.transform='rotateX(
 formCard.addEventListener('mouseleave', ()=>{ formCard.style.transform='rotateX(0) rotateY(0)'; });
 
 // ---- Hintergrund Partikel & Netz ----
-const canvas=document.getElementById('bgCanvas');
-const ctx=canvas.getContext('2d');
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-const particles=[];
-const particleCount=300;
-for(let i=0;i<particleCount;i++){
+// Mausposition
+let mouseX = null;
+let mouseY = null;
+const mouseRadius = 150; // Bereich in dem Partikel reagieren
+
+const particles = [];
+const particleCount = 60;
+
+// Partikel erstellen
+for (let i = 0; i < particleCount; i++) {
   particles.push({
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    vx:(Math.random()-0.5)*0.5,
-    vy:(Math.random()-0.5)*0.5,
-    size:Math.random()*2+1
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - 0.5) * 0.2, // Langsamere Startgeschwindigkeit
+    vy: (Math.random() - 0.5) * 0.2,
+    size: Math.random() * 2 + 1,
+    baseVx: (Math.random() - 0.5) * 0.2, // Basisgeschwindigkeit für sanftes Schweben
+    baseVy: (Math.random() - 0.5) * 0.2
   });
 }
 
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Linien
-  for(let i=0;i<particles.length;i++){
-    const p1=particles[i];
+  // Linien zwischen Partikeln
+  for (let i = 0; i < particles.length; i++) {
+    const p1 = particles[i];
     ctx.beginPath();
-    for(let j=i+1;j<particles.length;j++){
-      const p2=particles[j];
-      const dx=p1.x-p2.x;
-      const dy=p1.y-p2.y;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<120){
-        ctx.strokeStyle='rgba(255,255,255,'+(1-dist/120)+')';
-        ctx.lineWidth=1;
-        ctx.moveTo(p1.x,p1.y);
-        ctx.lineTo(p2.x,p2.y);
+    for (let j = i + 1; j < particles.length; j++) {
+      const p2 = particles[j];
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.strokeStyle = 'rgba(255,255,255,' + (1 - dist / 120) + ')';
+        ctx.lineWidth = 1;
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
     }
     ctx.closePath();
   }
   
-  // Partikel
-  particles.forEach(p=>{
-    p.x+=p.vx;
-    p.y+=p.vy;
-    if(p.x<0||p.x>canvas.width)p.vx*=-1;
-    if(p.y<0||p.y>canvas.height)p.vy*=-1;
-    ctx.fillStyle='white';
+  // Partikel bewegen
+  particles.forEach(p => {
+    // Wenn Maus in der Nähe ist
+    if (mouseX !== null && mouseY !== null) {
+      const dx = p.x - mouseX;
+      const dy = p.y - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (dist < mouseRadius) {
+        // Abstoßungskraft berechnen (je näher, desto stärker)
+        const force = (mouseRadius - dist) / mouseRadius;
+        const angle = Math.atan2(dy, dx);
+        
+        // Geschwindigkeit anpassen
+        p.vx = Math.cos(angle) * force * 2 + p.baseVx;
+        p.vy = Math.sin(angle) * force * 2 + p.baseVy;
+      } else {
+        // Sanft zur Basisgeschwindigkeit zurückkehren
+        p.vx += (p.baseVx - p.vx) * 0.05;
+        p.vy += (p.baseVy - p.vy) * 0.05;
+      }
+    } else {
+      // Langsam zur Basisgeschwindigkeit zurückkehren
+      p.vx += (p.baseVx - p.vx) * 0.02;
+      p.vy += (p.baseVy - p.vy) * 0.02;
+    }
+    
+    // Position aktualisieren
+    p.x += p.vx;
+    p.y += p.vy;
+    
+    // Bildschirmränder behandeln
+    if (p.x < 0 || p.x > canvas.width) p.vx *= -0.8;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -0.8;
+    
+    // Partikel zeichnen
+    ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
     ctx.fill();
   });
+  
   requestAnimationFrame(animate);
 }
 
 animate();
 
-// Maus beeinflusst Geschwindigkeit
-document.addEventListener('mousemove', e=>{
-  const mx = e.clientX / canvas.width - 0.5;
-  const my = e.clientY / canvas.height - 0.5;
-  particles.forEach(p=>{
-    p.vx+=mx*0.05;
-    p.vy+=my*0.05;
-  });
+// Mausposition verfolgen
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
 });
 
-window.addEventListener('resize', ()=>{
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
+document.addEventListener('mouseout', () => {
+  mouseX = null;
+  mouseY = null;
+});
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 });
 </script>
 
