@@ -1,274 +1,235 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pet Leveling Hilfe</title>
-<meta name="description" content="Formular für Pet-Leveling-Anfragen – sendet an einen Discord-Webhook." />
-<style>
-:root {
-  --bg: #0b1020;
-  --card: #121a33;
-  --text: #e7eaf6;
-  --muted: #9aa3c7;
-  --accent: #7aa2ff;
-  --accent-strong: #3d6aff;
-  --danger: #ff5b6e;
-  --success: #37c897;
-  --border: rgba(255,255,255,0.08);
-  --shadow: 0 10px 30px rgba(0,0,0,0.35);
-}
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f3f6ff;
-    --card: #ffffff;
-    --text: #0d1024;
-    --muted: #5c668a;
-    --accent: #326cff;
-    --accent-strong: #174bff;
-    --border: rgba(0,16,80,0.08);
-    --shadow: 0 10px 25px rgba(0,0,0,0.08);
-  }
-}
-* { box-sizing: border-box; }
-html, body { height: 100%; margin:0; font-family: ui-sans-serif, system-ui, sans-serif; }
-body {
-  background: radial-gradient(1200px 600px at 70% -10%, rgba(255,255,255,0.05), transparent),
-              radial-gradient(1000px 600px at -20% 110%, rgba(255,255,255,0.03), transparent),
-              var(--bg);
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  overflow-x: hidden;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pet Leveling Hilfe</title>
+  <meta name="description" content="Formular für Pet-Leveling-Anfragen – sendet an einen Discord-Webhook." />
+  <style>
+    :root {
+      --bg: #000000;
+      --card: #121212;
+      --text: #ffffff;
+      --muted: #bbbbbb;
+      --accent: #ffffff;
+      --accent-strong: #dddddd;
+      --danger: #ff5b6e;
+      --success: #37c897;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: sans-serif; background: #000; overflow: hidden; color: var(--text);}
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
 
-/* CARD STYLING */
-.card, .credits-card {
-  width: 100%;
-  max-width: 560px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  padding: 28px;
-  backdrop-filter: saturate(1.2) blur(6px);
-  margin-bottom: 24px;
-  transition: transform 0.1s ease-out;
-}
+    canvas { position: fixed; top:0; left:0; z-index:0; }
 
-h1 { margin: 0 0 18px; text-align: center; font-size: clamp(28px, 4vw, 36px); letter-spacing: .4px; }
-.subtitle { text-align: center; margin-bottom: 22px; color: var(--muted); font-size: 14px; }
+    .card {
+      width: 100%; max-width: 560px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; box-shadow: var(--shadow); padding: 28px; backdrop-filter: saturate(1.2) blur(6px);
+      transform: translateZ(0); z-index:1; margin-bottom: 20px;
+    }
+    h1 { margin: 0 0 18px; text-align: center; font-size: clamp(28px,4vw,36px); letter-spacing: .4px; }
+    .subtitle { text-align: center; margin-bottom: 22px; color: var(--muted); font-size: 14px; }
 
-/* FORM ELEMENTE */
-label { display:block; font-size:13px; color: var(--muted); margin:12px 2px 6px; }
-input, textarea {
-  width: 100%; padding: 12px 14px; border-radius: 12px; border:1px solid var(--border);
-  background: transparent; color: var(--text); outline:none; font-size:15px;
-}
-input::placeholder, textarea::placeholder { color: var(--muted); opacity:.9; }
-input:focus, textarea:focus { border-color: var(--accent); box-shadow:0 0 0 3px rgba(50,108,255,0.18); }
-textarea { min-height:80px; resize: vertical; }
-.row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-.btn {
-  width:100%; margin-top:18px; padding:12px 16px; border:none; border-radius:12px;
-  background: linear-gradient(180deg, var(--accent), var(--accent-strong)); color:white;
-  font-weight:700; font-size:16px; cursor:pointer; transition: transform .06s ease, filter .2s ease, opacity .2s ease;
-}
-.btn:hover { filter: brightness(1.05); }
-.btn:active { transform: translateY(1px); }
-.btn[disabled] { opacity:.65; cursor:not-allowed; }
-.status { margin-top:12px; font-size:14px; text-align:center; min-height:22px; }
-.ok { color: var(--success); }
-.err { color: var(--danger); }
-.note { font-size:12px; color: var(--muted); margin-top:12px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin: 12px 2px 6px; }
+    input, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); outline: none; font-size: 15px; }
+    input::placeholder, textarea::placeholder { color: var(--muted); opacity: .9; }
 
-/* CREDITS-FENSTER */
-.credits-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.credits-left, .credits-right {
-  display:flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.credits-item {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.credits-item img { width:50px; height:50px; border-radius:8px; object-fit:cover; }
-.credits-right img { width:80px; height:80px; border-radius:12px; }
-.credits-text { display:flex; flex-direction: column; font-size:14px; }
-.credits-text span:first-child { font-weight:700; }
-.credits-text span:last-child { font-size:12px; color: var(--muted); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn { width: 100%; margin-top: 18px; padding: 12px 16px; border: none; border-radius: 12px; background: linear-gradient(180deg, var(--accent), var(--accent-strong)); color: white; font-weight: 700; font-size: 16px; cursor: pointer; }
+    .btn:hover { filter: brightness(1.05); }
+    .status { margin-top: 12px; font-size: 14px; text-align: center; min-height: 22px; }
+    .ok { color: var(--success); }
+    .err { color: var(--danger); }
+    .footer { margin-top: 8px; text-align: center; font-size: 12px; color: var(--muted); }
+    .note { font-size: 12px; color: var(--muted); margin-top: 12px; }
 
-</style>
+    /* Credits-Fenster */
+    .credits-card {
+      width: 100%; max-width: 560px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; box-shadow: var(--shadow); padding: 20px; backdrop-filter: saturate(1.2) blur(6px);
+      display: flex; justify-content: space-between; align-items: center; transform: translateZ(0); z-index:1;
+    }
+    .credits-left, .credits-right { display: flex; flex-direction: column; gap: 12px; }
+    .credit-item { display: flex; align-items: center; gap: 10px; }
+    .credit-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; }
+    .credit-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .credit-text .title { font-weight: bold; font-size: 14px; }
+    .credit-text .name { font-size: 13px; color: var(--muted); }
+    .credits-right img { width: 80px; height: 80px; border-radius: 10px; margin-bottom: 5px; }
+    .credits-right span { font-size: 16px; font-weight: bold; color: var(--accent); text-align: center; }
+  </style>
 </head>
 <body>
+  <canvas id="bgCanvas"></canvas>
 
-<main class="card" id="mainCard">
-  <h1>Pet Leveling Hilfe</h1>
-  <p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
+  <main class="card" id="mainCard">
+    <h1>Pet Leveling Hilfe</h1>
+    <p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
 
-  <form id="levelForm" autocomplete="on">
-    <label for="roblox">Roblox Nutzername</label>
-    <input id="roblox" name="roblox" type="text" placeholder="..." required />
+    <form id="levelForm" autocomplete="on">
+      <label for="roblox">Roblox Nutzername</label>
+      <input id="roblox" name="roblox" type="text" placeholder="..." required />
 
-    <label for="discord">Discord Nutzername</label>
-    <input id="discord" name="discord" type="text" placeholder="..." required />
+      <label for="discord">Discord Nutzername</label>
+      <input id="discord" name="discord" type="text" placeholder="..." required />
 
-    <label for="petWanted">Welches pet soll gelevelt werden?</label>
-    <input id="petWanted" name="petWanted" type="text" placeholder="..." required />
+      <label for="petWanted">Welches pet soll gelevelt werden?</label>
+      <input id="petWanted" name="petWanted" type="text" placeholder="..." required />
 
-    <div class="row">
-      <div>
-        <label for="petCurrent">Momentanes Level</label>
-        <input id="petCurrent" name="petCurrent" type="text" placeholder="..." required />
+      <div class="row">
+        <div>
+          <label for="petCurrent">Momentanes Level</label>
+          <input id="petCurrent" name="petCurrent" type="text" placeholder="..." required />
+        </div>
+        <div>
+          <label for="targetLevel">Ziel Level</label>
+          <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
+        </div>
       </div>
-      <div>
-        <label for="targetLevel">Ziel Level</label>
-        <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
-      </div>
-    </div>
 
-    <label for="offer">Was zahlst du? Was gibst du uns dafür?</label>
-    <input id="offer" name="offer" type="text" placeholder="..." required />
+      <label for="offer">Was zahlst du? Was gibst du uns dafuer?</label>
+      <input id="offer" name="offer" type="text" placeholder="..." required />
 
-    <label for="extra">Extra kommentar</label>
-    <textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln bitte..."></textarea>
+      <label for="extra">Extra kommentar</label>
+      <textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln bitte... Ich kann bis morgen warten..."></textarea>
 
-    <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
-    <div id="status" class="status" aria-live="polite"></div>
-    <p class="note">Hinweis: Platzhaltertexte verschwinden automatisch, sobald du tippst.</p>
-  </form>
-</main>
+      <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
+      <div id="status" class="status" aria-live="polite"></div>
+      <p class="note">Hinweis: Platzhaltertexte verschwinden automatisch, sobald du tippst.</p>
+    </form>
 
-<main class="credits-card" id="creditsCard">
-  <div class="credits-inner">
+    <p class="footer">© <span id="y"></span> Pet Leveling</p>
+  </main>
+
+  <div class="credits-card" id="creditsCard">
     <div class="credits-left">
-      <div class="credits-item">
+      <div class="credit-item">
         <img src="images/image1.jpg" alt="Developer">
-        <div class="credits-text"><span>Developer</span><span>ywxo</span></div>
+        <div class="credit-text"><span class="title">Developer</span><span class="name">ywxo</span></div>
       </div>
-      <div class="credits-item">
+      <div class="credit-item">
         <img src="images/image2.jpg" alt="Owner">
-        <div class="credits-text"><span>Owner</span><span>saintpscl</span></div>
+        <div class="credit-text"><span class="title">Owner</span><span class="name">saintpscl</span></div>
       </div>
     </div>
     <div class="credits-right">
-      <div class="credits-item">
-        <img src="images/image3.jpg" alt="Discord">
-        <div class="credits-text"><span>Discord</span><span>discord.gg/gaggermany</span></div>
-      </div>
+      <img src="images/image3.jpg" alt="Discord">
+      <span>discord.gg/gaggermany</span>
     </div>
   </div>
-</main>
 
-<script>
-// Discord Webhook URL (eintragen falls nötig)
-const WEBHOOK_URL = "https://discord.com/api/webhooks/DEIN_WEBHOOK";
-const WEBHOOK_USERNAME = "Pet Leveling Bot";
-const WEBHOOK_AVATAR = "";
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
 
-const form = document.getElementById('levelForm');
-const btn = document.getElementById('sendBtn');
-const statusEl = document.getElementById('status');
-const mainCard = document.getElementById('mainCard');
-const creditsCard = document.getElementById('creditsCard');
-document.getElementById('y').textContent = new Date().getFullYear();
+    // Discord Webhook Code
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/DEIN_WEBHOOK";
+    const WEBHOOK_USERNAME = "Pet Leveling Bot";
+    const WEBHOOK_AVATAR = "";
 
-function getVal(id){ return (document.getElementById(id).value || "").trim(); }
+    const form = document.getElementById('levelForm');
+    const btn = document.getElementById('sendBtn');
+    const statusEl = document.getElementById('status');
 
-function buildPayload(){
-  const roblox = getVal('roblox');
-  const discord = getVal('discord');
-  const wanted = getVal('petWanted');
-  const current = getVal('petCurrent');
-  const target = getVal('targetLevel');
-  const offer  = getVal('offer');
-  const extra  = getVal('extra');
+    function getVal(id){ return (document.getElementById(id).value || "").trim(); }
 
-  const embed = {
-    title: "Neue Pet Leveling Anfrage",
-    color: 0x5865F2,
-    fields: [
-      { name: "Roblox Name", value: roblox || "—", inline: false },
-      { name: "Discord Name", value: discord || "—", inline: false },
-      { name: "Pet (gewünscht)", value: wanted || "—", inline: false },
-      { name: "Pet (aktuelles Level)", value: current || "—", inline: true },
-      { name: "Pet (Ziel Level)", value: target || "—", inline: true },
-      { name: "Angebot", value: offer || "—", inline: false },
-      { name: "Extra", value: extra || "—", inline: false }
-    ],
-    footer: { text: "Pet Leveling Hilfe" }
-  };
-  return { username: WEBHOOK_USERNAME, avatar_url: WEBHOOK_AVATAR, embeds: [embed] };
-}
+    function buildPayload(){
+      const roblox = getVal('roblox');
+      const discord = getVal('discord');
+      const wanted = getVal('petWanted');
+      const current = getVal('petCurrent');
+      const target = getVal('targetLevel');
+      const offer  = getVal('offer');
+      const extra  = getVal('extra');
 
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  btn.disabled = true;
-  statusEl.textContent = "Sende...";
-  try {
-    const res = await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildPayload())
-    });
-    if(res.ok) {
-      statusEl.textContent = "Erfolgreich gesendet!";
-      form.reset();
-    } else {
-      statusEl.textContent = "Fehler beim Senden!";
+      const embed = {
+        title: "Neue Pet Leveling Anfrage",
+        color: 0x5865F2,
+        fields: [
+          { name: "Roblox Name", value: roblox || "—", inline: false },
+          { name: "Discord Name", value: discord || "—", inline: false },
+          { name: "Pet (gewünscht)", value: wanted || "—", inline: false },
+          { name: "Pet (aktuell)", value: current || "—", inline: true },
+          { name: "Ziel-Level", value: target || "—", inline: true },
+          { name: "Gegenleistung", value: offer || "—", inline: false },
+        ],
+        timestamp: new Date().toISOString()
+      };
+
+      if (extra) embed.fields.push({name: "Extra", value: extra, inline:false});
+
+      return { username: WEBHOOK_USERNAME, avatar_url: WEBHOOK_AVATAR, embeds:[embed] };
     }
-  } catch(err) { statusEl.textContent = "Fehler: "+err; }
-  btn.disabled = false;
-});
 
-// Mouse Tilt Effekt
-document.addEventListener('mousemove', e => {
-  const x = e.clientX / window.innerWidth;
-  const y = e.clientY / window.innerHeight;
-  const tiltX = (y - 0.5) * 10;
-  const tiltY = (x - 0.5) * 10;
-  mainCard.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-  creditsCard.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-});
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      btn.disabled = true;
+      statusEl.textContent = "Sende Anfrage...";
+      try{
+        const res = await fetch(WEBHOOK_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(buildPayload()) });
+        if(res.ok){ statusEl.textContent="Erfolgreich gesendet!"; statusEl.className="status ok"; form.reset(); }
+        else { statusEl.textContent="Fehler beim senden."; statusEl.className="status err"; }
+      }catch(err){ statusEl.textContent="Fehler beim senden."; statusEl.className="status err"; }
+      btn.disabled = false;
+    });
 
-// Partikel-Animation
-const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
-canvas.style.position = 'fixed';
-canvas.style.top=0; canvas.style.left=0; canvas.style.width='100%'; canvas.style.height='100%';
-canvas.style.pointerEvents='none';
-const ctx = canvas.getContext('2d');
-let particles = [];
-function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-window.addEventListener('resize', resize); resize();
-for(let i=0;i<60;i++){
-  particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r: Math.random()*2+1, dx:(Math.random()-0.5)*0.4, dy:(Math.random()-0.5)*0.4});
-}
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>{
-    p.x += p.dx; p.y += p.dy;
-    if(p.x<0 || p.x>canvas.width) p.dx*=-1;
-    if(p.y<0 || p.y>canvas.height) p.dy*=-1;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.fill();
-  });
-  requestAnimationFrame(animate);
-}
-animate();
-</script>
+    // Tilt-Effekt
+    const mainCard = document.getElementById('mainCard');
+    const creditsCard = document.getElementById('creditsCard');
+    document.addEventListener('mousemove', e => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      const tiltX = (y - 0.5) * 10; // Original-Wert
+      const tiltY = (x - 0.5) * 10;
+      mainCard.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+      creditsCard.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+    });
 
+    // Hintergrund-Canvas: Netz & Partikel
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    function resize(){ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const grid = [];
+    const gridSize = 60;
+    for(let y=0;y<h;y+=gridSize){
+      for(let x=0;x<w;x+=gridSize){
+        grid.push({x,y});
+      }
+    }
+
+    const particles = [];
+    for(let i=0;i<40;i++){
+      particles.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*2+1, dx:(Math.random()-0.5)*0.3, dy:(Math.random()-0.5)*0.3});
+    }
+
+    function animate(){
+      ctx.clearRect(0,0,w,h);
+      // grid lines
+      ctx.strokeStyle = "rgba(255,255,255,0.05)";
+      grid.forEach(p=>{
+        ctx.beginPath();
+        ctx.moveTo(p.x,0); ctx.lineTo(p.x,h);
+        ctx.moveTo(0,p.y); ctx.lineTo(w,p.y);
+        ctx.stroke();
+      });
+      // particles
+      ctx.fillStyle="white";
+      particles.forEach(p=>{
+        p.x+=p.dx; p.y+=p.dy;
+        if(p.x<0||p.x>w)p.dx*=-1;
+        if(p.y<0||p.y>h)p.dy*=-1;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+        ctx.fill();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
 </body>
 </html>
