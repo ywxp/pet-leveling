@@ -24,7 +24,7 @@
     color: var(--text-dark);
     overflow: hidden;
   }
-  canvas#bgCanvas {
+  canvas#bgCanvas, canvas#netCanvas {
     position: absolute;
     inset: 0;
     z-index: 0;
@@ -33,21 +33,20 @@
     position: relative;
     z-index: 1;
     width: 90%;
-    max-width: 500px;
+    max-width: 480px;
     background: var(--card-dark);
     border: 1px solid var(--border-dark);
     border-radius: 18px;
     box-shadow: var(--shadow-dark);
-    padding: 24px;
+    padding: 20px;
     transform-style: preserve-3d;
     transition: transform 0.15s ease;
     display: flex;
     flex-direction: column;
-    justify-content: center;
   }
   h1 {
     text-align: center;
-    margin-bottom: 15px;
+    margin: 0 0 12px 0;
   }
   .subtitle {
     text-align: center;
@@ -62,9 +61,9 @@
     display: block;
   }
   input, textarea {
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 10px;
+    width: calc(100% - 4px);
+    padding: 7px 9px;
+    border-radius: 8px;
     border: 1px solid var(--border-dark);
     background: transparent;
     color: var(--text-dark);
@@ -72,6 +71,7 @@
     outline: none;
     margin-bottom: 10px;
     transition: border-color .2s ease, box-shadow .2s ease;
+    box-sizing: border-box;
   }
   input::placeholder, textarea::placeholder {
     color: var(--muted-dark);
@@ -84,13 +84,13 @@
   .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
   }
   .btn {
     width: 100%;
     padding: 10px;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     background: var(--accent);
     color: #000;
     font-weight: bold;
@@ -100,7 +100,7 @@
   .btn:hover { filter: brightness(0.9); }
   .btn:active { transform: translateY(1px); }
   .status {
-    margin-top: 10px;
+    margin-top: 8px;
     text-align: center;
     min-height: 20px;
     font-size: 13px;
@@ -116,6 +116,7 @@
 </style>
 </head>
 <body>
+<canvas id="netCanvas"></canvas>
 <canvas id="bgCanvas"></canvas>
 <main class="card" id="card">
   <h1>Pet Leveling Hilfe</h1>
@@ -151,7 +152,7 @@
 </main>
 
 <script>
-const WEBHOOK_URL = "HIER_WEBHOOK_URL_EINFÜGEN";
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1405308908813291623/XacK1SrkTgR3tr6iHT7d9gu8ZTisvnScPCvAggsesxXxZRyLuMXPxsPyusyHNTwtThUZ";
 const WEBHOOK_USERNAME = "Pet Leveling Bot";
 const WEBHOOK_AVATAR = "";
 
@@ -213,39 +214,78 @@ document.getElementById('levelForm').addEventListener('submit', async e => {
 // 3D Neige-Effekt (75% stärker)
 const card = document.getElementById('card');
 document.addEventListener('mousemove', e => {
-  const x = (e.clientX / window.innerWidth - 0.5) * 35; // vorher 20
-  const y = -(e.clientY / window.innerHeight - 0.5) * 35; // vorher 20
+  const x = (e.clientX / window.innerWidth - 0.5) * 35;
+  const y = -(e.clientY / window.innerHeight - 0.5) * 35;
   card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
 });
 document.addEventListener('mouseleave', () => {
   card.style.transform = `rotateY(0deg) rotateX(0deg)`;
 });
 
-// Hintergrund-Effekt
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
-let w, h;
-function resize(){
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
+// Hintergrund: Lichtschein
+const bgCanvas = document.getElementById('bgCanvas');
+const bgCtx = bgCanvas.getContext('2d');
+let bw, bh;
+function resizeBg(){
+  bw = bgCanvas.width = window.innerWidth;
+  bh = bgCanvas.height = window.innerHeight;
 }
-window.addEventListener('resize', resize);
-resize();
-let mouseX = w/2, mouseY = h/2;
+window.addEventListener('resize', resizeBg);
+resizeBg();
+let mouseX = bw/2, mouseY = bh/2;
 document.addEventListener('mousemove', e => {
   mouseX = e.clientX;
   mouseY = e.clientY;
 });
-function draw(){
-  ctx.clearRect(0,0,w,h);
-  const grad = ctx.createRadialGradient(mouseX, mouseY, 50, mouseX, mouseY, 500);
+function drawBg(){
+  bgCtx.clearRect(0,0,bw,bh);
+  const grad = bgCtx.createRadialGradient(mouseX, mouseY, 50, mouseX, mouseY, 500);
   grad.addColorStop(0, 'rgba(255,255,255,0.05)');
   grad.addColorStop(1, 'transparent');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0,0,w,h);
-  requestAnimationFrame(draw);
+  bgCtx.fillStyle = grad;
+  bgCtx.fillRect(0,0,bw,bh);
+  requestAnimationFrame(drawBg);
 }
-draw();
+drawBg();
+
+// Animiertes Netz
+const netCanvas = document.getElementById('netCanvas');
+const netCtx = netCanvas.getContext('2d');
+let nw, nh;
+function resizeNet(){
+  nw = netCanvas.width = window.innerWidth;
+  nh = netCanvas.height = window.innerHeight;
+}
+resizeNet();
+window.addEventListener('resize', resizeNet);
+let t = 0;
+function drawNet(){
+  netCtx.clearRect(0,0,nw,nh);
+  netCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+  netCtx.lineWidth = 1;
+  const spacing = 40;
+  for (let x = -spacing; x < nw + spacing; x += spacing) {
+    netCtx.beginPath();
+    for (let y = 0; y <= nh; y += spacing) {
+      const offset = Math.sin((y / spacing) + t + x / 100) * 5;
+      if (y === 0) netCtx.moveTo(x + offset, y);
+      else netCtx.lineTo(x + offset, y);
+    }
+    netCtx.stroke();
+  }
+  for (let y = -spacing; y < nh + spacing; y += spacing) {
+    netCtx.beginPath();
+    for (let x = 0; x <= nw; x += spacing) {
+      const offset = Math.cos((x / spacing) + t + y / 100) * 5;
+      if (x === 0) netCtx.moveTo(x, y + offset);
+      else netCtx.lineTo(x, y + offset);
+    }
+    netCtx.stroke();
+  }
+  t += 0.01;
+  requestAnimationFrame(drawNet);
+}
+drawNet();
 </script>
 </body>
 </html>
