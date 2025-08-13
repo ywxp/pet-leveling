@@ -40,49 +40,17 @@
     }
     .status { text-align:center; margin-top:10px; font-size:14px; color: var(--muted); }
     
-    /* Credit Card */
-    .credit-card {
+    /* Music Player Card */
+    .music-card {
       width: 100%; max-width: 520px; padding: 18px; background: var(--card); border-radius: 18px;
       border: 1px solid var(--border); box-shadow: var(--shadow); backdrop-filter: blur(6px);
       margin-top:20px; transform-style: preserve-3d; transition: transform 0.1s ease-out; position: relative; z-index:1;
-      display: flex; gap: 15px;
+      display: flex; align-items: center; gap:10px;
     }
-    .credit-images {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .credit-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .credit-card img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .credit-info {
-      display: flex;
-      flex-direction: column;
-    }
-    .credit-title {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .credit-name {
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .discord-link {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: bold;
-    }
+    .music-card img { width:60px; height:60px; border-radius:10px; object-fit:cover; }
+    .controls { flex:1; display:flex; flex-direction: column; gap:5px; }
+    .controls button { background: var(--accent); color: var(--card); border:none; padding:5px 8px; border-radius:6px; cursor:pointer; }
+    .slider { width:100%; }
   </style>
 </head>
 <body>
@@ -114,26 +82,14 @@
   </form>
 </main>
 
-<main class="credit-card" id="creditCard">
-  <div class="credit-images">
-    <div class="credit-row">
-      <img src="images/image1.jpg" alt="Developer">
-      <div class="credit-info">
-        <span class="credit-title">Developer</span>
-        <span class="credit-name">ywxo</span>
-      </div>
+<main class="music-card" id="musicCard">
+  <img id="cover" src="images/song1.jpg" alt="Cover">
+  <div class="controls">
+    <input type="range" id="slider" class="slider" min="0" max="100" value="0">
+    <div>
+      <button id="playBtn">Play</button>
+      <button id="muteBtn">Mute</button>
     </div>
-    <div class="credit-row">
-      <img src="images/image2.jpg" alt="Owner">
-      <div class="credit-info">
-        <span class="credit-title">Owner</span>
-        <span class="credit-name">saintpscl</span>
-      </div>
-    </div>
-  </div>
-  <div class="discord-link">
-    <img src="images/image3.jpg" alt="Discord" style="margin-right: 10px;">
-    <span>discord.gg/gaggermany</span>
   </div>
 </main>
 
@@ -164,11 +120,11 @@
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width/2;
     const y = e.clientY - rect.top - rect.height/2;
-    card.style.transform = `rotateX(${-y/10}deg) rotateY(${x/10}deg)`; // Reduzierte Neigung
+    card.style.transform = `rotateX(${-y/5}deg) rotateY(${x/5}deg)`; // 5 → erhöhe auf 3 für stärkere Neigung
   }
   document.addEventListener('mousemove', e=>{
     tiltCard(document.getElementById('formCard'), e);
-    tiltCard(document.getElementById('creditCard'), e);
+    tiltCard(document.getElementById('musicCard'), e);
   });
 
   // ---- Netz + Partikel ----
@@ -205,6 +161,24 @@
   }
   draw();
   window.addEventListener('resize',()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
+
+  // ---- Music Player ----
+  const audio = new Audio("audio/song1.mp3"); // MP3 hier
+  const playBtn = document.getElementById('playBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const slider = document.getElementById('slider');
+
+  playBtn.addEventListener('click', ()=>{
+    if(audio.paused){audio.play(); playBtn.textContent='Pause';}
+    else{audio.pause(); playBtn.textContent='Play';}
+  });
+  muteBtn.addEventListener('click', ()=>{audio.muted=!audio.muted; muteBtn.textContent=audio.muted?'Unmute':'Mute';});
+  audio.addEventListener('timeupdate', ()=>{
+    slider.value = (audio.currentTime/audio.duration)*100 || 0;
+  });
+  slider.addEventListener('input', ()=>{
+    audio.currentTime = (slider.value/100)*audio.duration;
+  });
 </script>
 </body>
 </html>
