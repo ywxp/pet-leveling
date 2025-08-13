@@ -1,171 +1,102 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pet Leveling Hilfe</title>
-<meta name="description" content="Formular für Pet-Leveling-Anfragen – sendet an einen Discord-Webhook." />
-<style>
-  :root {
-    --bg-dark: #0a0a0a;
-    --card-dark: #1a1a1a;
-    --text-dark: #f0f0f0;
-    --muted-dark: #aaa;
-    --border-dark: rgba(255,255,255,0.08);
-    --shadow-dark: 0 10px 30px rgba(0,0,0,0.4);
-    --accent: #ffffff;
-  }
-  body {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-    height: 100vh;
-    display: grid;
-    place-items: center;
-    background: var(--bg-dark);
-    color: var(--text-dark);
-    overflow: hidden;
-  }
-  canvas#bgCanvas, canvas#netCanvas {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  .card {
-    position: relative;
-    z-index: 1;
-    width: 90%;
-    max-width: 480px;
-    background: var(--card-dark);
-    border: 1px solid var(--border-dark);
-    border-radius: 18px;
-    box-shadow: var(--shadow-dark);
-    padding: 20px;
-    transform-style: preserve-3d;
-    transition: transform 0.15s ease;
-    display: flex;
-    flex-direction: column;
-  }
-  h1 {
-    text-align: center;
-    margin: 0 0 12px 0;
-  }
-  .subtitle {
-    text-align: center;
-    margin-bottom: 18px;
-    color: var(--muted-dark);
-    font-size: 14px;
-  }
-  label {
-    font-size: 13px;
-    color: var(--muted-dark);
-    margin-bottom: 4px;
-    display: block;
-  }
-  input, textarea {
-    width: calc(100% - 4px);
-    padding: 7px 9px;
-    border-radius: 8px;
-    border: 1px solid var(--border-dark);
-    background: transparent;
-    color: var(--text-dark);
-    font-size: 14px;
-    outline: none;
-    margin-bottom: 10px;
-    transition: border-color .2s ease, box-shadow .2s ease;
-    box-sizing: border-box;
-  }
-  input::placeholder, textarea::placeholder {
-    color: var(--muted-dark);
-  }
-  input:focus, textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 8px rgba(255,255,255,0.3);
-  }
-  textarea { min-height: 60px; resize: vertical; }
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .btn {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    background: var(--accent);
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.06s ease, filter 0.2s ease;
-  }
-  .btn:hover { filter: brightness(0.9); }
-  .btn:active { transform: translateY(1px); }
-  .status {
-    margin-top: 8px;
-    text-align: center;
-    min-height: 20px;
-    font-size: 13px;
-  }
-  .ok { color: lightgreen; }
-  .err { color: #ff5b6e; }
-  .footer {
-    margin-top: 5px;
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted-dark);
-  }
-:root {
-  --bg: #0b0b0b;
-  --card: #1a1a1a;
-  --text: #ffffff;
-  --muted: #bbbbbb;
-  --accent: #ffffff;
-  --accent-strong: #dddddd;
-  --danger: #ff5b6e;
-  --success: #37c897;
-  --border: rgba(255,255,255,0.08);
-  --shadow: 0 15px 35px rgba(0,0,0,0.5);
-}
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; display: grid; place-items: center; background: #0b0b0b; color: var(--text); overflow: hidden; }
-body::before {
-  content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background: #0b0b0b;
-}
-#netCanvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-2; }
-.card {
-  width: 100%; max-width: 500px; background: var(--card); border-radius: 18px; box-shadow: var(--shadow);
-  padding: 28px; transform-style: preserve-3d; transition: transform 0.1s ease;
-}
-h1 { text-align:center; font-size: clamp(28px, 4vw,36px); margin:0 0 18px; }
-.subtitle { text-align:center; margin-bottom:22px; color: var(--muted); font-size:14px; }
-label { display:block; font-size:13px; color: var(--muted); margin:12px 2px 6px; }
-input, textarea { width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--text); font-size:14px; margin-bottom:12px; }
-textarea { min-height:60px; resize: vertical; }
-.row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.btn { width:100%; padding:12px 16px; border:none; border-radius:12px; background: linear-gradient(180deg, var(--accent), var(--accent-strong)); color:#000; font-weight:700; font-size:16px; cursor:pointer; }
-.status { margin-top:12px; font-size:14px; text-align:center; min-height:22px; }
-.ok { color: var(--success); }
-.err { color: var(--danger); }
-.footer { margin-top:8px; text-align:center; font-size:12px; color: var(--muted); }
-.note { font-size:12px; color:var(--muted); margin-top:12px; text-align:center; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pet Leveling Hilfe</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --text: #ffffff;
+      --muted: #aaaaaa;
+      --accent: #ffffff;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height: 100%; font-family: sans-serif; overflow: hidden; }
+    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items:center; justify-content: center; }
+    canvas#netCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
+
+    .card {
+      width: 100%; max-width: 520px; padding: 28px; background: var(--card); border-radius: 18px;
+      border: 1px solid var(--border); box-shadow: var(--shadow); backdrop-filter: blur(6px);
+      transform-style: preserve-3d; transition: transform 0.1s ease-out;
+      position: relative; z-index: 1;
+    }
+
+    h1 { text-align: center; font-size: 32px; margin-bottom: 12px; }
+    label { display:block; font-size:13px; margin-top:10px; color: var(--muted); }
+    input, textarea {
+      width: 100%; padding:10px; margin-top:4px; border-radius:10px; border:1px solid var(--border);
+      background: transparent; color: var(--text); font-size:14px; outline:none;
+    }
+    .row { display: flex; gap:10px; }
+    .row input { flex:1; }
+    .btn {
+      margin-top:15px; padding:12px; width:100%; border:none; border-radius:12px;
+      background: var(--accent); color: var(--card); font-weight:700; cursor:pointer;
+    }
+    .status { text-align:center; margin-top:10px; font-size:14px; color: var(--muted); }
+    
+    /* Credit Card */
+    .credit-card {
+      width: 100%; max-width: 520px; padding: 18px; background: var(--card); border-radius: 18px;
+      border: 1px solid var(--border); box-shadow: var(--shadow); backdrop-filter: blur(6px);
+      margin-top:20px; transform-style: preserve-3d; transition: transform 0.1s ease-out; position: relative; z-index:1;
+      display: flex; gap: 15px;
+    }
+    .credit-images {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .credit-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .credit-card img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .credit-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .credit-title {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .credit-name {
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .discord-link {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
 <canvas id="netCanvas"></canvas>
-<canvas id="bgCanvas"></canvas>
-<main class="card" id="card">
+
+<main class="card" id="formCard">
   <h1>Pet Leveling Hilfe</h1>
-  <p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
   <form id="levelForm" autocomplete="on">
     <label for="roblox">Roblox Nutzername</label>
     <input id="roblox" name="roblox" type="text" placeholder="..." required />
-
     <label for="discord">Discord Nutzername</label>
     <input id="discord" name="discord" type="text" placeholder="..." required />
-
-    <label for="petWanted">Welches Pet soll gelevelt werden?</label>
+    <label for="petWanted">Welches pet soll gelevelt werden?</label>
     <input id="petWanted" name="petWanted" type="text" placeholder="..." required />
-
     <div class="row">
       <div>
         <label for="petCurrent">Momentanes Level</label>
@@ -176,223 +107,104 @@ textarea { min-height:60px; resize: vertical; }
         <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
       </div>
     </div>
-
-    <label for="offer">Was gibst du fürs Leveln?</label>
+    <label for="offer">Was zahlst du? Was gibst du uns dafür?</label>
     <input id="offer" name="offer" type="text" placeholder="..." required />
-
     <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
-    <div id="status" class="status" aria-live="polite"></div>
+    <div id="status" class="status"></div>
   </form>
-  <p class="footer">© <span id="y"></span> Pet Leveling</p>
-<h1>Pet Leveling Hilfe</h1>
-<p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
-<form id="levelForm" autocomplete="on">
-<label for="roblox">Roblox Nutzername</label>
-<input id="roblox" name="roblox" type="text" placeholder="..." required />
-<label for="discord">Discord Nutzername</label>
-<input id="discord" name="discord" type="text" placeholder="..." required />
-<label for="petWanted">Welches pet soll gelevelt werden?</label>
-<input id="petWanted" name="petWanted" type="text" placeholder="..." required />
-<div class="row">
-<div>
-<label for="petCurrent">Momentanes Level</label>
-<input id="petCurrent" name="petCurrent" type="text" placeholder="..." required />
-</div>
-<div>
-<label for="targetLevel">Ziel Level</label>
-<input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
-</div>
-</div>
-<label for="offer">Was zahlst du? Was gibst du uns dafuer?</label>
-<input id="offer" name="offer" type="text" placeholder="..." required />
-<label for="extra">Extra kommentar</label>
-<textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln bitte... Ich kann bis morgen warten..."></textarea>
-<button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
-<div id="status" class="status" aria-live="polite"></div>
-<p class="note">Hinweis: Platzhaltertexte verschwinden automatisch, sobald du tippst.</p>
-</form>
-<p class="footer">© <span id="y"></span> Pet Leveling</p>
+</main>
+
+<main class="credit-card" id="creditCard">
+  <div class="credit-images">
+    <div class="credit-row">
+      <img src="images/image1.jpg" alt="Developer">
+      <div class="credit-info">
+        <span class="credit-title">Developer</span>
+        <span class="credit-name">ywxo</span>
+      </div>
+    </div>
+    <div class="credit-row">
+      <img src="images/image2.jpg" alt="Owner">
+      <div class="credit-info">
+        <span class="credit-title">Owner</span>
+        <span class="credit-name">saintpscl</span>
+      </div>
+    </div>
+  </div>
+  <div class="discord-link">
+    <img src="images/image3.jpg" alt="Discord" style="margin-right: 10px;">
+    <span>discord.gg/gaggermany</span>
+  </div>
 </main>
 
 <script>
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1405308908813291623/XacK1SrkTgR3tr6iHT7d9gu8ZTisvnScPCvAggsesxXxZRyLuMXPxsPyusyHNTwtThUZ";
-document.getElementById('y').textContent = new Date().getFullYear();
-const WEBHOOK_URL = "HIER_DEINE_WEBHOOK_URL";
-const WEBHOOK_USERNAME = "Pet Leveling Bot";
-const WEBHOOK_AVATAR = "";
-
-document.getElementById('y').textContent = new Date().getFullYear();
-
-const form = document.getElementById('levelForm');
-const btn = document.getElementById('sendBtn');
-const statusEl = document.getElementById('status');
-function getVal(id){ return (document.getElementById(id).value || "").trim(); }
-function buildPayload(){
-  return {
-    username: WEBHOOK_USERNAME || undefined,
-    avatar_url: WEBHOOK_AVATAR || undefined,
-    embeds: [{
-      title: "Neue Pet Leveling Anfrage",
-      color: 0xaaaaaa,
-      fields: [
-        { name: "Roblox Name", value: getVal('roblox') || "—" },
-        { name: "Discord Name", value: getVal('discord') || "—" },
-        { name: "Pet (gewünscht)", value: getVal('petWanted') || "—" },
-        { name: "Pet (aktuell)", value: getVal('petCurrent') || "—", inline: true },
-        { name: "Ziel-Level", value: getVal('targetLevel') || "—", inline: true },
-        { name: "Gegenleistung", value: getVal('offer') || "—" }
-      ],
-      timestamp: new Date().toISOString()
-    }]
-  };
-  const roblox = getVal('roblox'); const discord = getVal('discord'); const wanted = getVal('petWanted'); const current = getVal('petCurrent'); const target = getVal('targetLevel'); const offer  = getVal('offer'); const extra  = getVal('extra');
-  const embed = { title: "Neue Pet Leveling Anfrage", color: 0x5865F2, fields:[
-    { name: "Roblox Name", value: roblox || "—", inline: false },
-    { name: "Discord Name", value: discord || "—", inline: false },
-    { name: "Pet (gewünscht)", value: wanted || "—", inline: false },
-    { name: "Pet (aktuell)", value: current || "—", inline: true },
-    { name: "Ziel-Level", value: target || "—", inline: true },
-    { name: "Gegenleistung", value: offer || "—", inline: false }
-  ], timestamp: new Date().toISOString() };
-  if (extra) embed.fields.push({ name: "Notizen", value: extra, inline: false });
-  return { username: WEBHOOK_USERNAME||undefined, avatar_url: WEBHOOK_AVATAR||undefined, content:null, embeds:[embed] };
-}
-
-document.getElementById('levelForm').addEventListener('submit', async e => {
-function show(msg, ok=false){ statusEl.textContent = msg; statusEl.className='status '+(ok?'ok':'err'); }
-form.addEventListener('submit', async e=>{
-  e.preventDefault();
-  const statusEl = document.getElementById('status');
+  // ---- Form Webhook ----
+  const WEBHOOK_URL = ""; // Hier Discord Webhook einfügen
+  const form = document.getElementById('levelForm');
   const btn = document.getElementById('sendBtn');
+  const statusEl = document.getElementById('status');
 
-  if (!WEBHOOK_URL.includes("http")) {
-    statusEl.textContent = "Bitte Webhook-URL eintragen.";
-    statusEl.className = "status err";
-    return;
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    btn.disabled = true;
+    statusEl.textContent = "Sende…";
+    try {
+      const payload = {
+        content: `Neue Anfrage:\nRoblox: ${form.roblox.value}\nDiscord: ${form.discord.value}\nPet: ${form.petWanted.value}\nAktuell: ${form.petCurrent.value}\nZiel: ${form.targetLevel.value}\nGegenleistung: ${form.offer.value}`
+      };
+      const res = await fetch(WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+      if(res.ok){statusEl.textContent="Erfolgreich gesendet! ✅";form.reset();}
+      else{statusEl.textContent="Fehler beim Senden";}
+    } catch(err){statusEl.textContent="Fehler beim Senden";}
+    btn.disabled = false;
+  });
+
+  // ---- Card Neigung ----
+  function tiltCard(card, e){
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width/2;
+    const y = e.clientY - rect.top - rect.height/2;
+    card.style.transform = `rotateX(${-y/10}deg) rotateY(${x/10}deg)`; // Reduzierte Neigung
   }
+  document.addEventListener('mousemove', e=>{
+    tiltCard(document.getElementById('formCard'), e);
+    tiltCard(document.getElementById('creditCard'), e);
+  });
 
-  btn.disabled = true;
-  statusEl.textContent = "Sende...";
-  statusEl.className = "status ok";
-
-  try {
-    const res = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildPayload())
-    });
-    if (!res.ok) throw new Error(res.status);
-    statusEl.textContent = "Anfrage gesendet! ✅";
-    statusEl.className = "status ok";
-    e.target.reset();
-  } catch {
-    statusEl.textContent = "Fehler beim Senden.";
-    statusEl.className = "status err";
+  // ---- Netz + Partikel ----
+  const canvas = document.getElementById('netCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const particles = [];
+  for(let i=0;i<120;i++){
+    particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3});
   }
-  btn.disabled = false;
-  if(!WEBHOOK_URL || WEBHOOK_URL==="https://discord.com/api/webhooks/1405308908813291623/XacK1SrkTgR3tr6iHT7d9gu8ZTisvnScPCvAggsesxXxZRyLuMXPxsPyusyHNTwtThUZ"){ show('Bitte trage im Code deine Discord-Webhook-URL ein.',false); return; }
-  btn.disabled=true; show('Sende …',true);
-  try{
-    const res=await fetch(WEBHOOK_URL,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(buildPayload())});
-    if(!res.ok) show('Fehler beim Senden ('+res.status+').', false);
-    else { show('Anfrage erfolgreich versendet! ✅',true); form.reset(); }
-  }catch(err){ show('Fehler beim Senden (CORS/Verbindung).', false); } finally{ btn.disabled=false; }
-});
-
-// 3D Neige-Effekt (75% stärker)
-const card = document.getElementById('card');
-document.addEventListener('mousemove', e => {
-  const x = (e.clientX / window.innerWidth - 0.5) * 35;
-  const y = -(e.clientY / window.innerHeight - 0.5) * 35;
-  card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
-});
-document.addEventListener('mouseleave', () => {
-  card.style.transform = `rotateY(0deg) rotateX(0deg)`;
-document.addEventListener('mousemove', e=>{
-  const x = (e.clientX/window.innerWidth-0.5)*60;
-  const y = -(e.clientY/window.innerHeight-0.5)*60;
-  const scale = 1+0.1*Math.sin(Math.sqrt(x*x+y*y)*Math.PI/70);
-  card.style.transform=`rotateY(${x}deg) rotateX(${y}deg) scaleZ(${scale})`;
-});
-document.addEventListener('mouseleave', ()=>{ card.style.transform=`rotateY(0deg) rotateX(0deg) scaleZ(1)`; });
-
-// Hintergrund: Lichtschein
-const bgCanvas = document.getElementById('bgCanvas');
-const bgCtx = bgCanvas.getContext('2d');
-let bw, bh;
-function resizeBg(){
-  bw = bgCanvas.width = window.innerWidth;
-  bh = bgCanvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeBg);
-resizeBg();
-let mouseX = bw/2, mouseY = bh/2;
-document.addEventListener('mousemove', e => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-});
-function drawBg(){
-  bgCtx.clearRect(0,0,bw,bh);
-  const grad = bgCtx.createRadialGradient(mouseX, mouseY, 50, mouseX, mouseY, 500);
-  grad.addColorStop(0, 'rgba(255,255,255,0.05)');
-  grad.addColorStop(1, 'transparent');
-  bgCtx.fillStyle = grad;
-  bgCtx.fillRect(0,0,bw,bh);
-  requestAnimationFrame(drawBg);
-}
-drawBg();
-
-// Animiertes Netz
-const netCanvas = document.getElementById('netCanvas');
-const netCtx = netCanvas.getContext('2d');
-let nw, nh;
-function resizeNet(){
-  nw = netCanvas.width = window.innerWidth;
-  nh = netCanvas.height = window.innerHeight;
-}
-resizeNet();
-window.addEventListener('resize', resizeNet);
-let t = 0;
-function drawNet(){
-const netCanvas=document.getElementById('netCanvas'); const netCtx=netCanvas.getContext('2d');
-let nw=window.innerWidth; let nh=window.innerHeight; netCanvas.width=nw; netCanvas.height=nh;
-window.addEventListener('resize',()=>{ nw=window.innerWidth; nh=window.innerHeight; netCanvas.width=nw; netCanvas.height=nh; });
-let t=0; const particles=[]; const particleCount=50;
-for(let i=0;i<particleCount;i++) particles.push({ x:Math.random()*nw, y:Math.random()*nh, vx:(Math.random()-0.5)*0.2, vy:(Math.random()-0.5)*0.2, size:Math.random()*2+1 });
-function drawParticles(){ for(const p of particles){ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=nw; if(p.x>nw)p.x=0; if(p.y<0)p.y=nh; if(p.y>nh)p.y=0; netCtx.beginPath(); netCtx.arc(p.x,p.y,p.size,0,Math.PI*2); netCtx.fillStyle='rgba(255,255,255,0.6)'; netCtx.fill(); } }
-function drawNetWithParticles(){
-  netCtx.clearRect(0,0,nw,nh);
-  netCtx.strokeStyle = 'rgba(255,255,255,0.05)';
-  netCtx.lineWidth = 1;
-  const spacing = 40;
-  for (let x = -spacing; x < nw + spacing; x += spacing) {
-    netCtx.beginPath();
-    for (let y = 0; y <= nh; y += spacing) {
-      const offset = Math.sin((y / spacing) + t + x / 100) * 5;
-      if (y === 0) netCtx.moveTo(x + offset, y);
-      else netCtx.lineTo(x + offset, y);
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Linien
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist<100){
+          ctx.strokeStyle = 'rgba(255,255,255,'+(1-dist/100)+')';
+          ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.stroke();
+        }
+      }
     }
-    netCtx.stroke();
-  }
-  for (let y = -spacing; y < nh + spacing; y += spacing) {
-    netCtx.beginPath();
-    for (let x = 0; x <= nw; x += spacing) {
-      const offset = Math.cos((x / spacing) + t + y / 100) * 5;
-      if (x === 0) netCtx.moveTo(x, y + offset);
-      else netCtx.lineTo(x, y + offset);
+    // Partikel
+    for(let p of particles){
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>canvas.width)p.vx*=-1;
+      if(p.y<0||p.y>canvas.height)p.vy*=-1;
+      ctx.fillStyle='white';
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
     }
-    netCtx.stroke();
+    requestAnimationFrame(draw);
   }
-  t += 0.01;
-  requestAnimationFrame(drawNet);
-  netCtx.strokeStyle='rgba(255,255,255,0.05)'; netCtx.lineWidth=1;
-  const spacing=40;
-  for(let x=-spacing;x<nw+spacing;x+=spacing){ netCtx.beginPath(); for(let y=0;y<=nh;y+=spacing){ const offset=Math.sin((y/spacing)+t+x/100)*5; if(y===0) netCtx.moveTo(x+offset,y); else netCtx.lineTo(x+offset,y); } netCtx.stroke(); }
-  for(let y=-spacing;y<nh+spacing;y+=spacing){ netCtx.beginPath(); for(let x=0;x<=nw;x+=spacing){ const offset=Math.cos((x/spacing)+t+y/100)*5; if(x===0) netCtx.moveTo(x,y+offset); else netCtx.lineTo(x,y+offset); } netCtx.stroke(); }
-  drawParticles(); t+=0.01; requestAnimationFrame(drawNetWithParticles);
-}
-drawNet();
-drawNetWithParticles();
+  draw();
+  window.addEventListener('resize',()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
 </script>
 </body>
 </html>
