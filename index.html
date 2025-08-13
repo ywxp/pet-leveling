@@ -116,15 +116,27 @@
   });
 
   // ---- Card Neigung ----
-  function tiltCard(card, e){
+  function tiltCard(card, e) {
     const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width/2;
-    const y = e.clientY - rect.top - rect.height/2;
-    card.style.transform = `rotateX(${-y/5}deg) rotateY(${x/5}deg)`; // 5 → erhöhe auf 3 für stärkere Neigung
+    const x = (e.clientX - rect.left - rect.width/2) / (rect.width/2);
+    const y = (e.clientY - rect.top - rect.height/2) / (rect.height/2);
+    
+    const tiltX = -y * 15;
+    const tiltY = x * 15;
+    
+    card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
   }
-  document.addEventListener('mousemove', e=>{
+
+  document.addEventListener('mousemove', e => {
     tiltCard(document.getElementById('formCard'), e);
     tiltCard(document.getElementById('musicCard'), e);
+  });
+
+  document.addEventListener('mouseout', () => {
+    const cards = [document.getElementById('formCard'), document.getElementById('musicCard')];
+    cards.forEach(card => {
+      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
   });
 
   // ---- Netz + Partikel ----
@@ -161,24 +173,3 @@
   }
   draw();
   window.addEventListener('resize',()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
-
-  // ---- Music Player ----
-  const audio = new Audio("audio/song1.mp3"); // MP3 hier
-  const playBtn = document.getElementById('playBtn');
-  const muteBtn = document.getElementById('muteBtn');
-  const slider = document.getElementById('slider');
-
-  playBtn.addEventListener('click', ()=>{
-    if(audio.paused){audio.play(); playBtn.textContent='Pause';}
-    else{audio.pause(); playBtn.textContent='Play';}
-  });
-  muteBtn.addEventListener('click', ()=>{audio.muted=!audio.muted; muteBtn.textContent=audio.muted?'Unmute':'Mute';});
-  audio.addEventListener('timeupdate', ()=>{
-    slider.value = (audio.currentTime/audio.duration)*100 || 0;
-  });
-  slider.addEventListener('input', ()=>{
-    audio.currentTime = (slider.value/100)*audio.duration;
-  });
-</script>
-</body>
-</html>
