@@ -98,33 +98,33 @@
     <p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
 
     <form id="levelForm" autocomplete="on">
-      <label for="roblox">Roblox Name</label>
-      <input id="roblox" name="roblox" type="text" placeholder="roblox name" required />
+      <label for="roblox">Roblox Nutzername</label>
+      <input id="roblox" name="roblox" type="text" placeholder="..." required />
 
-      <label for="discord">Discord Name</label>
-      <input id="discord" name="discord" type="text" placeholder="discord name" required />
+      <label for="discord">Discord Nutzername</label>
+      <input id="discord" name="discord" type="text" placeholder="..." required />
 
-      <label for="petWanted">Welches Pet soll gelevelt werden?</label>
-      <input id="petWanted" name="petWanted" type="text" placeholder="welches pet soll gelevelt werden" required />
+      <label for="petWanted">Welches pet soll gelevelt werden?</label>
+      <input id="petWanted" name="petWanted" type="text" placeholder="..." required />
 
       <div class="row">
         <div>
-          <label for="petCurrent">Welches Pet hast du gerade?</label>
-          <input id="petCurrent" name="petCurrent" type="text" placeholder="welches hat es gerade" required />
+          <label for="petCurrent">Momentanes Level</label>
+          <input id="petCurrent" name="petCurrent" type="text" placeholder="..." required />
         </div>
         <div>
-          <label for="targetLevel">Ziel-Level</label>
-          <input id="targetLevel" name="targetLevel" type="text" placeholder="auf welches level soll es" required />
+          <label for="targetLevel">Ziel Level</label>
+          <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
         </div>
       </div>
 
-      <label for="offer">Was gibst du für das Leveln?</label>
-      <input id="offer" name="offer" type="text" placeholder="was gibst du fuer das leveln" required />
+      <label for="offer">Was zahlst du? Was gibst du uns dafuer?</label>
+      <input id="offer" name="offer" type="text" placeholder="..." required />
 
-      <label for="extra">Notizen (optional)</label>
-      <textarea id="extra" name="extra" placeholder="z. B. Wunsch-Zeitfenster, besondere Regeln …"></textarea>
+      <label for="extra">Extra kommentar</label>
+      <textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln bitte... Ich kann bis morgen warten..."></textarea>
 
-      <button id="sendBtn" class="btn" type="submit">Anfrage an Discord senden</button>
+      <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
       <div id="status" class="status" aria-live="polite"></div>
       <p class="note">Hinweis: Platzhaltertexte verschwinden automatisch, sobald du tippst.</p>
     </form>
