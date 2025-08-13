@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pet Leveling Hilfe</title>
+  <meta name="description" content="Formular für Pet-Leveling-Anfragen – sendet an einen Discord-Webhook." />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #121a33;
+      --text: #e7eaf6;
+      --muted: #9aa3c7;
+      --accent: #7aa2ff;
+      --accent-strong: #3d6aff;
+      --danger: #ff5b6e;
+      --success: #37c897;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f3f6ff;
+        --card: #ffffff;
+        --text: #0d1024;
+        --muted: #5c668a;
+        --accent: #326cff;
+        --accent-strong: #174bff;
+        --border: rgba(0,16,80,0.08);
+        --shadow: 0 10px 25px rgba(0,0,0,0.08);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 70% -10%, rgba(109,132,255,0.25), transparent),
+                  radial-gradient(1000px 600px at -20% 110%, rgba(110,230,200,0.2), transparent),
+                  var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      backdrop-filter: saturate(1.2) blur(6px);
+      transform: translateZ(0);
+    }
+    h1 {
+      margin: 0 0 18px;
+      text-align: center;
+      font-size: clamp(28px, 4vw, 36px);
+      letter-spacing: .4px;
+    }
+    .subtitle { text-align: center; margin-bottom: 22px; color: var(--muted); font-size: 14px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin: 12px 2px 6px; }
+    input, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+      font-size: 15px;
+    }
+    input::placeholder, textarea::placeholder { color: var(--muted); opacity: .9; }
+    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(50,108,255,0.18); }
+    textarea { min-height: 80px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn {
+      width: 100%; margin-top: 18px; padding: 12px 16px; border: none; border-radius: 12px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-strong)); color: white; font-weight: 700; font-size: 16px; cursor: pointer;
+      transition: transform .06s ease, filter .2s ease, opacity .2s ease;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+    .btn[disabled] { opacity: .65; cursor: not-allowed; }
+    .status { margin-top: 12px; font-size: 14px; text-align: center; min-height: 22px; }
+    .ok { color: var(--success); }
+    .err { color: var(--danger); }
+    .footer { margin-top: 8px; text-align: center; font-size: 12px; color: var(--muted); }
+    .note { font-size: 12px; color: var(--muted); margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Pet Leveling Hilfe</h1>
+    <p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
+
+    <form id="levelForm" autocomplete="on">
+      <label for="roblox">Roblox Name</label>
+      <input id="roblox" name="roblox" type="text" placeholder="roblox name" required />
+
+      <label for="discord">Discord Name</label>
+      <input id="discord" name="discord" type="text" placeholder="discord name" required />
+
+      <label for="petWanted">Welches Pet soll gelevelt werden?</label>
+      <input id="petWanted" name="petWanted" type="text" placeholder="welches pet soll gelevelt werden" required />
+
+      <div class="row">
+        <div>
+          <label for="petCurrent">Welches Pet hast du gerade?</label>
+          <input id="petCurrent" name="petCurrent" type="text" placeholder="welches hat es gerade" required />
+        </div>
+        <div>
+          <label for="targetLevel">Ziel-Level</label>
+          <input id="targetLevel" name="targetLevel" type="text" placeholder="auf welches level soll es" required />
+        </div>
+      </div>
+
+      <label for="offer">Was gibst du für das Leveln?</label>
+      <input id="offer" name="offer" type="text" placeholder="was gibst du fuer das leveln" required />
+
+      <label for="extra">Notizen (optional)</label>
+      <textarea id="extra" name="extra" placeholder="z. B. Wunsch-Zeitfenster, besondere Regeln …"></textarea>
+
+      <button id="sendBtn" class="btn" type="submit">Anfrage an Discord senden</button>
+      <div id="status" class="status" aria-live="polite"></div>
+      <p class="note">Hinweis: Platzhaltertexte verschwinden automatisch, sobald du tippst.</p>
+    </form>
+
+    <p class="footer">© <span id="y"></span> Pet Leveling</p>
+  </main>
+
+  <script>
+    // 1) TRAGE HIER DEINE DISCORD-WEBHOOK-URL EIN (zwischen den Anführungszeichen):
+    const WEBHOOK_URL = "HIER_WEBHOOK_URL_EINFUEGEN";
+    // Optional: Anzeigename/Avatar des Webhooks
+    const WEBHOOK_USERNAME = "Pet Leveling Bot"; // oder leer lassen
+    const WEBHOOK_AVATAR = ""; // z. B. ein Bild-Link oder leer lassen
+
+    const form = document.getElementById('levelForm');
+    const btn = document.getElementById('sendBtn');
+    const statusEl = document.getElementById('status');
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    function getVal(id){ return (document.getElementById(id).value || "").trim(); }
+
+    function buildPayload(){
+      const roblox = getVal('roblox');
+      const discord = getVal('discord');
+      const wanted = getVal('petWanted');
+      const current = getVal('petCurrent');
+      const target = getVal('targetLevel');
+      const offer  = getVal('offer');
+      const extra  = getVal('extra');
+
+      const embed = {
+        title: "Neue Pet Leveling Anfrage",
+        color: 0x5865F2, // Discord Blurple
+        fields: [
+          { name: "Roblox Name", value: roblox || "—", inline: false },
+          { name: "Discord Name", value: discord || "—", inline: false },
+          { name: "Pet (gewünscht)", value: wanted || "—", inline: false },
+          { name: "Pet (aktuell)", value: current || "—", inline: true },
+          { name: "Ziel-Level", value: target || "—", inline: true },
+          { name: "Gegenleistung", value: offer || "—", inline: false },
+        ],
+        timestamp: new Date().toISOString()
+      };
+
+      if (extra) {
+        embed.fields.push({ name: "Notizen", value: extra, inline: false });
+      }
+
+      return {
+        username: WEBHOOK_USERNAME || undefined,
+        avatar_url: WEBHOOK_AVATAR || undefined,
+        content: null, // alternativ: hier @Role/@User erwähnen
+        embeds: [embed]
+      };
+    }
+
+    function show(msg, ok=false){
+      statusEl.textContent = msg;
+      statusEl.className = 'status ' + (ok ? 'ok' : 'err');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!WEBHOOK_URL || WEBHOOK_URL === 'HIER_WEBHOOK_URL_EINFUEGEN') {
+        show('Bitte trage im Code deine Discord-Webhook-URL ein.', false);
+        return;
+      }
+
+      btn.disabled = true;
+      show('Sende …', true);
+
+      try {
+        const payload = buildPayload();
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          // Häufige Fälle: 401/404 bei falscher URL, 429 bei Rate-Limit, CORS-Block im Browser
+          show('Fehler beim Senden (' + res.status + '). Prüfe die Webhook-URL oder nutze einen sicheren Proxy.', false);
+        } else {
+          show('Anfrage erfolgreich versendet! ✅', true);
+          form.reset();
+        }
+      } catch (err) {
+        // Wenn der Browser CORS blockt, landet man hier.
+        console.error(err);
+        show('Die Anfrage wurde vom Browser blockiert (CORS) oder die Verbindung schlug fehl. Nutze ggf. einen Proxy/Worker.', false);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
