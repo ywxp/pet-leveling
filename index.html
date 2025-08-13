@@ -180,22 +180,27 @@ canvas.height = window.innerHeight;
 // Mausposition
 let mouseX = null;
 let mouseY = null;
-const mouseRadius = 150; // Bereich in dem Partikel reagieren
+const mouseRadius = 180; // Bereich in dem Partikel reagieren
 
 const particles = [];
-const particleCount = 340;
+const particleCount = 180;
 
-// Partikel erstellen
-for (let i = 0; i < particleCount; i++) {
-  particles.push({
+// Funktion zum Erstellen eines neuen Partikels
+function createParticle() {
+  return {
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
-    vx: (Math.random() - 0.5) * 0.2, // Langsamere Startgeschwindigkeit
+    vx: (Math.random() - 0.5) * 0.2,
     vy: (Math.random() - 0.5) * 0.2,
     size: Math.random() * 2 + 1,
-    baseVx: (Math.random() - 0.5) * 0.2, // Basisgeschwindigkeit für sanftes Schweben
+    baseVx: (Math.random() - 0.5) * 0.2,
     baseVy: (Math.random() - 0.5) * 0.2
-  });
+  };
+}
+
+// Initiale Partikel erstellen
+for (let i = 0; i < particleCount; i++) {
+  particles.push(createParticle());
 }
 
 function animate() {
@@ -222,7 +227,9 @@ function animate() {
   }
   
   // Partikel bewegen
-  particles.forEach(p => {
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    
     // Wenn Maus in der Nähe ist
     if (mouseX !== null && mouseY !== null) {
       const dx = p.x - mouseX;
@@ -252,16 +259,22 @@ function animate() {
     p.x += p.vx;
     p.y += p.vy;
     
-    // Bildschirmränder behandeln
-    if (p.x < 0 || p.x > canvas.width) p.vx *= -0.8;
-    if (p.y < 0 || p.y > canvas.height) p.vy *= -0.8;
+    // Wenn Partikel außerhalb des sichtbaren Bereichs
+    if (p.x < -50 || p.x > canvas.width + 50 || 
+        p.y < -50 || p.y > canvas.height + 50) {
+      // Partikel entfernen und neuen erstellen
+      particles.splice(i, 1);
+      particles.push(createParticle());
+      i--; // Index anpassen, da wir ein Element entfernt haben
+      continue;
+    }
     
     // Partikel zeichnen
     ctx.fillStyle = 'white';
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
     ctx.fill();
-  });
+  }
   
   requestAnimationFrame(animate);
 }
