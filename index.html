@@ -1,82 +1,159 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pet Leveling Hilfe</title>
-<meta name="description" content="Formular für Pet-Leveling-Anfragen – sendet an einen Discord-Webhook.">
-
 <style>
 :root {
-  --bg: #0b1020;
-  --card: #121212;
-  --text: #fff;
-  --muted: #aaa;
-  --accent: #fff;
-  --accent-strong: #ccc;
-  --danger: #ff5b6e;
-  --success: #37c897;
+  --bg: #0b0b0b;
+  --card: #1a1a1a;
+  --text: #f5f5f5;
+  --muted: #aaaaaa;
+  --accent: #ffffff;
   --border: rgba(255,255,255,0.08);
   --shadow: 0 10px 30px rgba(0,0,0,0.35);
 }
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--text); display: grid; place-items: center; padding: 24px; overflow: hidden; }
-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
 
-.card {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 560px;
-  background: var(--card);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  padding: 28px;
-  backdrop-filter: saturate(1.2) blur(6px);
-  transform-style: preserve-3d;
-  transition: transform 0.15s ease;
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: sans-serif;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  perspective: 1200px;
 }
 
-h1 { margin: 0 0 18px; text-align: center; font-size: clamp(28px,4vw,36px); letter-spacing:.4px; }
-.subtitle { text-align: center; margin-bottom: 22px; color: var(--muted); font-size: 14px; }
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
 
-label { display: block; font-size: 13px; color: var(--muted); margin: 12px 2px 6px; }
-input, textarea { width: 100%; max-width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); font-size: 15px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
-input::placeholder, textarea::placeholder { color: var(--muted); opacity:.9; }
-input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,255,255,0.18); }
-textarea { min-height: 80px; resize: vertical; }
-
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.row input { width: 100%; }
-
-.btn { width: 100%; margin-top: 18px; padding: 12px 16px; border: none; border-radius: 12px; background: linear-gradient(180deg, var(--accent), var(--accent-strong)); color: white; font-weight: 700; font-size: 16px; cursor: pointer; transition: transform .06s ease, filter .2s ease, opacity .2s ease; }
-.btn:hover { filter: brightness(1.05); }
-.btn:active { transform: translateY(1px); }
-.btn[disabled] { opacity: .65; cursor: not-allowed; }
-
-.status { margin-top: 12px; font-size: 14px; text-align: center; min-height: 22px; }
-.ok { color: var(--success); }
-.err { color: var(--danger); }
-
-.credits {
-  position: relative;
-  z-index: 1;
+.card, .credit-card {
   width: 100%;
   max-width: 560px;
-  margin-top: 20px;
   background: var(--card);
   border-radius: 18px;
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  padding: 18px 24px;
+  padding: 28px;
+  color: var(--text);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+  z-index: 1;
+  margin-bottom: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  font-size: 14px;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.row > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.status {
+  margin-top: 10px;
+  text-align: center;
+  min-height: 22px;
+}
+
+.ok { color: #37c897; }
+.err { color: #ff5b6e; }
+
+.credit-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transform-style: preserve-3d;
-  transition: transform 0.15s ease;
+  max-width: 560px;
+  padding: 20px;
 }
-.credit-left, .credit-right { display: flex; align-items: center; gap: 12px; }
-.credit-left div, .credit-right div { display: flex; flex-direction: column; color: var(--text); font-size: 12px; line-height: 1.2; }
-.credit-left img, .credit-right img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+
+.credit-left, .credit-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.credit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.credit-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.credit-item div {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.credit-right div {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+}
+
 </style>
 </head>
 <body>
@@ -84,160 +161,212 @@ textarea { min-height: 80px; resize: vertical; }
 <canvas id="bgCanvas"></canvas>
 
 <main class="card" id="mainCard">
-<h1>Pet Leveling Hilfe</h1>
-<p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
+  <h1>Pet Leveling Hilfe</h1>
+  <form id="levelForm" autocomplete="on">
+    <label for="roblox">Roblox Nutzername</label>
+    <input id="roblox" name="roblox" type="text" placeholder="..." required />
 
-<form id="levelForm" autocomplete="on">
-  <label for="roblox">Roblox Nutzername</label>
-  <input id="roblox" name="roblox" type="text" placeholder="..." required />
+    <label for="discord">Discord Nutzername</label>
+    <input id="discord" name="discord" type="text" placeholder="..." required />
 
-  <label for="discord">Discord Nutzername</label>
-  <input id="discord" name="discord" type="text" placeholder="..." required />
+    <label for="petWanted">Welches Pet soll gelevelt werden?</label>
+    <input id="petWanted" name="petWanted" type="text" placeholder="..." required />
 
-  <label for="petWanted">Welches pet soll gelevelt werden?</label>
-  <input id="petWanted" name="petWanted" type="text" placeholder="..." required />
-
-  <div class="row">
-    <div>
-      <label for="petCurrent">Momentanes Level</label>
-      <input id="petCurrent" name="petCurrent" type="text" placeholder="..." required />
+    <div class="row">
+      <div>
+        <label for="petCurrent">Momentanes Level</label>
+        <input id="petCurrent" name="petCurrent" type="text" placeholder="..." required />
+      </div>
+      <div>
+        <label for="targetLevel">Ziel Level</label>
+        <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
+      </div>
     </div>
-    <div>
-      <label for="targetLevel">Ziel Level</label>
-      <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
-    </div>
-  </div>
 
-  <label for="offer">Was zahlst du? Was gibst du uns dafür?</label>
-  <input id="offer" name="offer" type="text" placeholder="..." required />
+    <label for="offer">Was zahlst du? Was gibst du uns dafür?</label>
+    <input id="offer" name="offer" type="text" placeholder="..." required />
 
-  <label for="extra">Extra Kommentar</label>
-  <textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln bitte... Ich kann bis morgen warten..."></textarea>
+    <label for="extra">Extra Kommentar</label>
+    <textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln bitte... Ich kann bis morgen warten..."></textarea>
 
-  <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
-  <div id="status" class="status" aria-live="polite"></div>
-</form>
-<p class="footer">© <span id="y"></span> Pet Leveling</p>
+    <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
+    <div id="status" class="status" aria-live="polite"></div>
+  </form>
 </main>
 
-<div class="credits" id="creditsCard">
+<main class="credit-card" id="creditCard">
   <div class="credit-left">
-    <img src="images/image1.png" alt="Developer">
-    <div>
-      <strong>Developer</strong>
-      <span>ywxo</span>
+    <div class="credit-item">
+      <img src="images/image1.png" alt="Developer">
+      <div>
+        <span>Developer</span>
+        <span>ywxo</span>
+      </div>
     </div>
-    <img src="images/image2.png" alt="Owner">
-    <div>
-      <strong>Owner</strong>
-      <span>saintpscl</span>
+    <div class="credit-item">
+      <img src="images/image2.png" alt="Owner">
+      <div>
+        <span>Owner</span>
+        <span>saintpscl</span>
+      </div>
     </div>
   </div>
   <div class="credit-right">
     <img src="images/image3.png" alt="Discord">
     <div>discord.gg/gaggermany</div>
   </div>
-</div>
+</main>
 
 <script>
-// Jahreszahl
-document.getElementById('y').textContent = new Date().getFullYear();
+const WEBHOOK_URL = "https://discord.com/api/webhooks/DEIN_WEBHOOK_HIER";
+const WEBHOOK_USERNAME = "Pet Leveling Bot";
+const WEBHOOK_AVATAR = "";
 
-// Mausinteraktion Card Neigung
-const card = document.getElementById('mainCard');
-const creditsCard = document.getElementById('creditsCard');
-
-function handleTilt(e, el, intensity=0.06){
-  const rect = el.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / rect.width - 0.5;
-  const y = (e.clientY - rect.top) / rect.height - 0.5;
-  el.style.transform = `rotateX(${y * intensity * 75}deg) rotateY(${x * intensity * 75}deg)`;
-}
-function resetTilt(el){ el.style.transform = 'rotateX(0deg) rotateY(0deg)'; }
-
-card.addEventListener('mousemove', e => handleTilt(e, card, 0.06));
-card.addEventListener('mouseleave', () => resetTilt(card));
-creditsCard.addEventListener('mousemove', e => handleTilt(e, creditsCard, 0.06));
-creditsCard.addEventListener('mouseleave', () => resetTilt(creditsCard));
-
-// Discord Webhook Formular
-const WEBHOOK_URL = ""; // DEINE WEBHOOK URL HIER
 const form = document.getElementById('levelForm');
 const btn = document.getElementById('sendBtn');
 const statusEl = document.getElementById('status');
 
 function getVal(id){ return (document.getElementById(id).value || "").trim(); }
+
 function buildPayload(){
-  const roblox = getVal('roblox'), discord = getVal('discord');
-  const wanted = getVal('petWanted'), current = getVal('petCurrent');
-  const target = getVal('targetLevel'), offer = getVal('offer'), extra = getVal('extra');
+  const roblox = getVal('roblox');
+  const discord = getVal('discord');
+  const wanted = getVal('petWanted');
+  const current = getVal('petCurrent');
+  const target = getVal('targetLevel');
+  const offer  = getVal('offer');
+  const extra  = getVal('extra');
+
   const embed = {
     title: "Neue Pet Leveling Anfrage",
-    color: 0xFFFFFF,
+    color: 0x5865F2,
     fields: [
-      { name: "Roblox Name", value: roblox||"—", inline: false },
-      { name: "Discord Name", value: discord||"—", inline: false },
-      { name: "Pet (gewünscht)", value: wanted||"—", inline: false },
-      { name: "Pet (aktuell)", value: current||"—", inline: true },
-      { name: "Ziel-Level", value: target||"—", inline: true },
-      { name: "Angebot", value: offer||"—", inline: false },
-      { name: "Extra", value: extra||"—", inline: false },
-    ]
+      { name: "Roblox Name", value: roblox || "—", inline: false },
+      { name: "Discord Name", value: discord || "—", inline: false },
+      { name: "Pet (gewünscht)", value: wanted || "—", inline: false },
+      { name: "Pet (aktuell)", value: current || "—", inline: true },
+      { name: "Ziel-Level", value: target || "—", inline: true },
+      { name: "Gegenleistung", value: offer || "—", inline: false },
+    ],
+    timestamp: new Date().toISOString()
   };
-  return { embeds: [embed] };
+
+  if(extra){
+    embed.fields.push({ name: "Notizen", value: extra, inline:false });
+  }
+
+  return {
+    username: WEBHOOK_USERNAME || undefined,
+    avatar_url: WEBHOOK_AVATAR || undefined,
+    content: null,
+    embeds: [embed]
+  };
 }
 
-form.addEventListener('submit', async e=>{
+function show(msg, ok=false){
+  statusEl.textContent = msg;
+  statusEl.className = 'status ' + (ok?'ok':'err');
+}
+
+form.addEventListener('submit', async (e)=>{
   e.preventDefault();
+  if(!WEBHOOK_URL || WEBHOOK_URL==="DEIN_WEBHOOK_HIER"){
+    show('Bitte trage im Code deine Discord-Webhook-URL ein.', false);
+    return;
+  }
   btn.disabled = true;
-  statusEl.textContent = "Sende...";
+  show('Sende …', true);
   try{
-    const res = await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(buildPayload())});
-    if(res.ok){ statusEl.textContent="Gesendet ✔"; statusEl.className="status ok"; form.reset(); }
-    else { throw new Error(await res.text()); }
-  } catch(err){ statusEl.textContent="Fehler beim Senden ✖"; statusEl.className="status err"; console.error(err);}
-  btn.disabled=false;
+    const payload = buildPayload();
+    const res = await fetch(WEBHOOK_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok) show('Fehler beim Senden ('+res.status+').', false);
+    else { show('Anfrage erfolgreich versendet! ✅', true); form.reset(); }
+  }catch(err){ console.error(err); show('Verbindung fehlgeschlagen.', false); }
+  finally{ btn.disabled = false; }
 });
 
-// Hintergrund Partikel
+// Mausbewegung für Card-Neigung
+const mainCard = document.getElementById('mainCard');
+const creditCard = document.getElementById('creditCard');
+
+document.addEventListener('mousemove', e=>{
+  const rect = mainCard.getBoundingClientRect();
+  const x = e.clientX - (rect.left + rect.width/2);
+  const y = e.clientY - (rect.top + rect.height/2);
+  const rotX = (y / rect.height) * 10; // leicht
+  const rotY = -(x / rect.width) * 10;
+  mainCard.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  creditCard.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+});
+
+mainCard.addEventListener('mouseenter', ()=>{ mainCard.style.transform = `rotateX(0) rotateY(0)`; });
+mainCard.addEventListener('mouseleave', ()=>{ mainCard.style.transform = `rotateX(0) rotateY(0)`; });
+creditCard.addEventListener('mouseenter', ()=>{ creditCard.style.transform = `rotateX(0) rotateY(0)`; });
+creditCard.addEventListener('mouseleave', ()=>{ creditCard.style.transform = `rotateX(0) rotateY(0)`; });
+
+// Hintergrund Canvas Netzwerk
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
-canvas.width = innerWidth; canvas.height = innerHeight;
-const particles = [];
-const particleCount = 80; // mehr Partikel
-for(let i=0;i<particleCount;i++){
-  particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, radius: Math.random()*3+1, dx:(Math.random()-0.5)*0.5, dy:(Math.random()-0.5)*0.5 });
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let nodes = [];
+for(let i=0;i<60;i++){
+  nodes.push({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    vx: (Math.random()-0.5)*0.3,
+    vy: (Math.random()-0.5)*0.3,
+    radius: Math.random()*2 + 1
+  });
 }
 
-function drawParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  for(const p of particles){
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.fill();
-    p.x+=p.dx; p.y+=p.dy;
-    if(p.x<0||p.x>canvas.width) p.dx*=-1;
-    if(p.y<0||p.y>canvas.height) p.dy*=-1;
-  }
-  requestAnimationFrame(drawParticles);
-}
-drawParticles();
+function draw(){
+  ctx.fillStyle = varGet('--bg') || '#0b0b0b';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-// Hintergrund auf Fensterbewegung reagieren
-document.addEventListener('mousemove', e=>{
-  for(const p of particles){
-    const distX = e.clientX - p.x;
-    const distY = e.clientY - p.y;
-    const dist = Math.sqrt(distX*distX + distY*distY);
-    if(dist<60){
-      p.x -= distX*0.002; p.y -= distY*0.002;
+  // Verbindungen
+  for(let i=0;i<nodes.length;i++){
+    for(let j=i+1;j<nodes.length;j++){
+      let dx = nodes[i].x - nodes[j].x;
+      let dy = nodes[i].y - nodes[j].y;
+      let dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist<120){
+        ctx.strokeStyle = 'rgba(255,255,255,'+(1-dist/120)*0.2+')';
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x,nodes[i].y);
+        ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.stroke();
+      }
     }
   }
+
+  // Punkte
+  for(let n of nodes){
+    ctx.fillStyle='white';
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,n.radius,0,Math.PI*2);
+    ctx.fill();
+    n.x+=n.vx; n.y+=n.vy;
+    if(n.x<0||n.x>canvas.width) n.vx*=-1;
+    if(n.y<0||n.y>canvas.height) n.vy*=-1;
+  }
+
+  requestAnimationFrame(draw);
+}
+
+function varGet(name){ return getComputedStyle(document.documentElement).getPropertyValue(name); }
+
+draw();
+
+window.addEventListener('resize', ()=>{
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 });
-
-window.addEventListener('resize', ()=>{ canvas.width=innerWidth; canvas.height=innerHeight; });
 </script>
-
 </body>
 </html>
