@@ -8,7 +8,7 @@
   <style>
     :root {
       --bg: #0b1020;
-      --card: #121a33;
+      --card: rgba(18, 26, 51, 0.88);
       --text: #e7eaf6;
       --muted: #9aa3c7;
       --accent: #7aa2ff;
@@ -18,30 +18,22 @@
       --border: rgba(255,255,255,0.08);
       --shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #f3f6ff;
-        --card: #ffffff;
-        --text: #0d1024;
-        --muted: #5c668a;
-        --accent: #326cff;
-        --accent-strong: #174bff;
-        --border: rgba(0,16,80,0.08);
-        --shadow: 0 10px 25px rgba(0,0,0,0.08);
-      }
-    }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
     body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 600px at 70% -10%, rgba(109,132,255,0.25), transparent),
-                  radial-gradient(1000px 600px at -20% 110%, rgba(110,230,200,0.2), transparent),
-                  var(--bg);
+      font-family: system-ui, sans-serif;
       color: var(--text);
       display: grid;
       place-items: center;
-      padding: 24px;
+    }
+    #bgCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 70% -10%, rgba(109,132,255,0.25), transparent 60%),
+                  radial-gradient(circle at -20% 110%, rgba(110,230,200,0.2), transparent 60%),
+                  var(--bg);
     }
     .card {
       width: 100%;
@@ -51,15 +43,14 @@
       border-radius: 18px;
       box-shadow: var(--shadow);
       padding: 28px;
-      backdrop-filter: saturate(1.2) blur(6px);
-      transform: translateZ(0);
+      backdrop-filter: blur(10px) saturate(1.3);
+      animation: fadeIn 0.8s ease;
     }
-    h1 {
-      margin: 0 0 18px;
-      text-align: center;
-      font-size: clamp(28px, 4vw, 36px);
-      letter-spacing: .4px;
+    @keyframes fadeIn {
+      from { transform: scale(0.97); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
+    h1 { margin: 0 0 18px; text-align: center; font-size: clamp(28px, 4vw, 36px); }
     .subtitle { text-align: center; margin-bottom: 22px; color: var(--muted); font-size: 14px; }
     label { display: block; font-size: 13px; color: var(--muted); margin: 12px 2px 6px; }
     input, textarea {
@@ -69,153 +60,190 @@
       border: 1px solid var(--border);
       background: transparent;
       color: var(--text);
-      outline: none;
-      transition: border-color .2s ease, box-shadow .2s ease;
       font-size: 15px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    input::placeholder, textarea::placeholder { color: var(--muted); opacity: .9; }
-    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(50,108,255,0.18); }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
     textarea { min-height: 80px; resize: vertical; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .btn {
-      width: 100%; margin-top: 18px; padding: 12px 16px; border: none; border-radius: 12px;
-      background: linear-gradient(180deg, var(--accent), var(--accent-strong)); color: white; font-weight: 700; font-size: 16px; cursor: pointer;
-      transition: transform .06s ease, filter .2s ease, opacity .2s ease;
+      width: 100%; margin-top: 18px; padding: 12px 16px;
+      border: none; border-radius: 12px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+      color: white; font-weight: 700; font-size: 16px; cursor: pointer;
+      transition: transform 0.1s ease, filter 0.3s ease;
     }
     .btn:hover { filter: brightness(1.05); }
     .btn:active { transform: translateY(1px); }
-    .btn[disabled] { opacity: .65; cursor: not-allowed; }
+    .btn[disabled] { opacity: 0.65; cursor: not-allowed; }
     .status { margin-top: 12px; font-size: 14px; text-align: center; min-height: 22px; }
     .ok { color: var(--success); }
     .err { color: var(--danger); }
     .footer { margin-top: 8px; text-align: center; font-size: 12px; color: var(--muted); }
-    .note { font-size: 12px; color: var(--muted); margin-top: 12px; }
   </style>
 </head>
 <body>
+  <canvas id="bgCanvas"></canvas>
+
   <main class="card">
     <h1>Pet Leveling Hilfe</h1>
     <p class="subtitle">Trage deine Daten ein und schicke eine Anfrage an unseren Discord.</p>
 
     <form id="levelForm" autocomplete="on">
       <label for="roblox">Roblox Nutzername</label>
-      <input id="roblox" name="roblox" type="text" placeholder="..." required />
+      <input id="roblox" type="text" placeholder="..." required />
 
       <label for="discord">Discord Nutzername</label>
-      <input id="discord" name="discord" type="text" placeholder="..." required />
+      <input id="discord" type="text" placeholder="..." required />
 
-      <label for="petWanted">Welches pet soll gelevelt werden?</label>
-      <input id="petWanted" name="petWanted" type="text" placeholder="..." required />
+      <label for="petWanted">Welches Pet soll gelevelt werden?</label>
+      <input id="petWanted" type="text" placeholder="..." required />
 
       <div class="row">
         <div>
           <label for="petCurrent">Momentanes Level</label>
-          <input id="petCurrent" name="petCurrent" type="text" placeholder="..." required />
+          <input id="petCurrent" type="text" placeholder="..." required />
         </div>
         <div>
           <label for="targetLevel">Ziel Level</label>
-          <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
+          <input id="targetLevel" type="text" placeholder="..." required />
         </div>
       </div>
 
-      <label for="offer">Was zahlst du? Was gibst du uns dafuer?</label>
-      <input id="offer" name="offer" type="text" placeholder="..." required />
+      <label for="offer">Was zahlst du? Was gibst du uns dafür?</label>
+      <input id="offer" type="text" placeholder="..." required />
 
-      <label for="extra">Extra kommentar</label>
-      <textarea id="extra" name="extra" placeholder="z. B. Heute noch leveln bitte... Ich kann bis morgen warten..."></textarea>
+      <label for="extra">Extra Kommentar</label>
+      <textarea id="extra" placeholder="z. B. Heute noch leveln bitte..."></textarea>
 
       <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
       <div id="status" class="status" aria-live="polite"></div>
-      <p class="note">Hinweis: Platzhaltertexte verschwinden automatisch, sobald du tippst.</p>
     </form>
 
     <p class="footer">© <span id="y"></span> Pet Leveling</p>
   </main>
 
   <script>
-    // 1) TRAGE HIER DEINE DISCORD-WEBHOOK-URL EIN (zwischen den Anführungszeichen):
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1405308908813291623/XacK1SrkTgR3tr6iHT7d9gu8ZTisvnScPCvAggsesxXxZRyLuMXPxsPyusyHNTwtThUZ";
-    // Optional: Anzeigename/Avatar des Webhooks
-    const WEBHOOK_USERNAME = "Pet Leveling Bot"; // oder leer lassen
-    const WEBHOOK_AVATAR = ""; // z. B. ein Bild-Link oder leer lassen
+    // Hintergrund-Particle-Effekt
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: null, y: null };
 
-    const form = document.getElementById('levelForm');
-    const btn = document.getElementById('sendBtn');
-    const statusEl = document.getElementById('status');
-    document.getElementById('y').textContent = new Date().getFullYear();
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    function getVal(id){ return (document.getElementById(id).value || "").trim(); }
-
-    function buildPayload(){
-      const roblox = getVal('roblox');
-      const discord = getVal('discord');
-      const wanted = getVal('petWanted');
-      const current = getVal('petCurrent');
-      const target = getVal('targetLevel');
-      const offer  = getVal('offer');
-      const extra  = getVal('extra');
-
-      const embed = {
-        title: "Neue Pet Leveling Anfrage",
-        color: 0x5865F2, // Discord Blurple
-        fields: [
-          { name: "Roblox Name", value: roblox || "—", inline: false },
-          { name: "Discord Name", value: discord || "—", inline: false },
-          { name: "Pet (gewünscht)", value: wanted || "—", inline: false },
-          { name: "Pet (aktuell)", value: current || "—", inline: true },
-          { name: "Ziel-Level", value: target || "—", inline: true },
-          { name: "Gegenleistung", value: offer || "—", inline: false },
-        ],
-        timestamp: new Date().toISOString()
-      };
-
-      if (extra) {
-        embed.fields.push({ name: "Notizen", value: extra, inline: false });
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
       }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        // Interaktion mit Maus
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 100) {
+          this.x -= dx / 10;
+          this.y -= dy / 10;
+        }
+        // Rand-Kollision
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+      draw() {
+        ctx.fillStyle = 'rgba(122,162,255,0.7)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < 80; i++) particles.push(new Particle());
+    }
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animateParticles);
+    }
+    canvas.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
+    canvas.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+    initParticles();
+    animateParticles();
 
+    // Formular-Logik
+    const WEBHOOK_URL = "HIER_DEINE_DISCORD_WEBHOOK_URL";
+    document.getElementById('y').textContent = new Date().getFullYear();
+    const form = document.getElementById('levelForm');
+    const statusEl = document.getElementById('status');
+    const btn = document.getElementById('sendBtn');
+
+    function getVal(id) {
+      return document.getElementById(id).value.trim();
+    }
+    function buildPayload() {
       return {
-        username: WEBHOOK_USERNAME || undefined,
-        avatar_url: WEBHOOK_AVATAR || undefined,
-        content: null, // alternativ: hier @Role/@User erwähnen
-        embeds: [embed]
+        content: null,
+        embeds: [{
+          title: "Neue Pet Leveling Anfrage",
+          color: 0x5865F2,
+          fields: [
+            { name: "Roblox Name", value: getVal('roblox') || "—" },
+            { name: "Discord Name", value: getVal('discord') || "—" },
+            { name: "Pet (gewünscht)", value: getVal('petWanted') || "—" },
+            { name: "Pet (aktuell)", value: getVal('petCurrent') || "—", inline: true },
+            { name: "Ziel-Level", value: getVal('targetLevel') || "—", inline: true },
+            { name: "Gegenleistung", value: getVal('offer') || "—" },
+            { name: "Notizen", value: getVal('extra') || "—" }
+          ],
+          timestamp: new Date().toISOString()
+        }]
       };
     }
-
-    function show(msg, ok=false){
+    function showStatus(msg, ok=false) {
       statusEl.textContent = msg;
       statusEl.className = 'status ' + (ok ? 'ok' : 'err');
     }
-
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('input', () => {
+      form.style.boxShadow = '0 0 15px rgba(122,162,255,0.4)';
+      clearTimeout(form._glowTimeout);
+      form._glowTimeout = setTimeout(() => {
+        form.style.boxShadow = 'none';
+      }, 500);
+    });
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-
-      if (!WEBHOOK_URL || WEBHOOK_URL === 'HIER_WEBHOOK_URL_EINFUEGEN') {
-        show('Bitte trage im Code deine Discord-Webhook-URL ein.', false);
+      if (!WEBHOOK_URL || WEBHOOK_URL.startsWith("HIER_")) {
+        showStatus("Webhook-URL fehlt!", false);
         return;
       }
-
       btn.disabled = true;
-      show('Sende …', true);
-
+      showStatus("Sende...", true);
       try {
-        const payload = buildPayload();
         const res = await fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(buildPayload())
         });
-
-        if (!res.ok) {
-          // Häufige Fälle: 401/404 bei falscher URL, 429 bei Rate-Limit, CORS-Block im Browser
-          show('Fehler beim Senden (' + res.status + '). Prüfe die Webhook-URL oder nutze einen sicheren Proxy.', false);
-        } else {
-          show('Anfrage erfolgreich versendet! ✅', true);
-          form.reset();
-        }
+        if (!res.ok) throw new Error(res.statusText);
+        showStatus("Anfrage erfolgreich versendet! ✅", true);
+        form.reset();
       } catch (err) {
-        // Wenn der Browser CORS blockt, landet man hier.
-        console.error(err);
-        show('Die Anfrage wurde vom Browser blockiert (CORS) oder die Verbindung schlug fehl. Nutze ggf. einen Proxy/Worker.', false);
+        showStatus("Fehler beim Senden. Wahrscheinlich CORS-Block im Browser.", false);
       } finally {
         btn.disabled = false;
       }
