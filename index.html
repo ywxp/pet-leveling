@@ -122,10 +122,17 @@
     const y = e.clientY - rect.top - rect.height/2;
     card.style.transform = `rotateX(${-y/5}deg) rotateY(${x/5}deg)`; // 5 → erhöhe auf 3 für stärkere Neigung
   }
-  document.addEventListener('mousemove', e=>{
-    tiltCard(document.getElementById('formCard'), e);
-    tiltCard(document.getElementById('musicCard'), e);
+  document.addEventListener('mousemove', e => {
+    const x = e.clientX / window.innerWidth;
+    const y = e.clientY / window.innerHeight;
+  
+    const tiltX = (y - 0.5) * 10; // Ursprünglicher Wert für Neigung nach oben/unten
+    const tiltY = (x - 0.5) * 10; // Ursprünglicher Wert für Neigung nach links/rechts
+  
+    mainCard.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+    musicCard.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
   });
+
 
   // ---- Netz + Partikel ----
   const canvas = document.getElementById('netCanvas');
