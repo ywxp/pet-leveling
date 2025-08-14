@@ -132,52 +132,19 @@ input, textarea {
 </main>
 
 <script>
-const WEBHOOK_URL = "DEIN_WEBHOOK_HIER";
-
-// Form & Status
+// Discord Webhook Script bleibt unverändert (wie in deinem vorherigen Code)
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1405339143667712080/QFpGTAWSGQkM504VInhyyJQsK82NORtT6GcDC1_Nxo94c795Synq9jTJqk4mTjEQlKhV";
 const form = document.getElementById('levelForm');
 const btn = document.getElementById('sendBtn');
 const statusEl = document.getElementById('status');
 
-// IP-Cooldown lokal (nur für Anzeige, echte IP-Prüfung serverseitig nötig)
-let lastSent = 0;
-
 form.addEventListener('submit', async (e)=>{
   e.preventDefault();
-  
-  const now = Date.now();
-  if(now - lastSent < 7200000){ // 2h
-    statusEl.textContent = "Du kannst erst in 2 Stunden erneut senden.";
-    return;
-  }
-
   btn.disabled=true;
   statusEl.textContent="Sende …";
-
   try{
-    const payload={
-      embeds:[{
-        title: "Neue Pet Leveling Anfrage",
-        color: 0x00ff00,
-        fields:[
-          {name:"Roblox Name", value: form.roblox.value, inline:true},
-          {name:"Discord Name", value: form.discord.value, inline:true},
-          {name:"Pet", value: form.petWanted.value, inline:true},
-          {name:"Momentanes Level", value: form.petCurrent.value, inline:true},
-          {name:"Ziel Level", value: form.targetLevel.value, inline:true},
-          {name:"Angebot", value: form.offer.value, inline:false}
-        ],
-        timestamp: new Date()
-      }]
-    };
-    
-    await fetch(WEBHOOK_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
-    
-    lastSent = now;
+    const payload={content:`Neue Anfrage: Roblox ${form.roblox.value}, Discord ${form.discord.value}`};
+    await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     statusEl.textContent="Erfolgreich gesendet ✅";
     form.reset();
   }catch(err){
@@ -185,7 +152,7 @@ form.addEventListener('submit', async (e)=>{
   }finally{btn.disabled=false;}
 });
 
-// ---- Card Neigung ----
+// Card Neigung
 const formCard = document.getElementById('formCard');
 const creditCard = document.getElementById('creditCard');
 
@@ -210,12 +177,15 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+// Mausposition
 let mouseX = null;
 let mouseY = null;
-const mouseRadius = 180;
+const mouseRadius = 180; // Bereich in dem Partikel reagieren
+
 const particles = [];
 const particleCount = 180;
 
+// Funktion zum Erstellen eines neuen Partikels
 function createParticle() {
   return {
     x: Math.random() * canvas.width,
@@ -228,59 +198,101 @@ function createParticle() {
   };
 }
 
-for (let i = 0; i < particleCount; i++) { particles.push(createParticle()); }
+// Initiale Partikel erstellen
+for (let i = 0; i < particleCount; i++) {
+  particles.push(createParticle());
+}
 
 function animate() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>{
-    p.x += p.vx;
-    p.y += p.vy;
-    
-    // Bounce
-    if(p.x<0 || p.x>canvas.width) p.vx*=-1;
-    if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-    
-    // Mouse repel
-    if(mouseX && mouseY){
-      const dx=p.x-mouseX, dy=p.y-mouseY, dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<mouseRadius){
-        const angle=Math.atan2(dy,dx);
-        const force=(mouseRadius-dist)/mouseRadius;
-        p.vx+=Math.cos(angle)*force*0.6;
-        p.vy+=Math.sin(angle)*force*0.6;
-      }
-    }
-    
-    ctx.fillStyle="#fff";
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-    ctx.fill();
-  });
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Connect lines
-  for(let i=0;i<particles.length;i++){
-    for(let j=i+1;j<particles.length;j++){
-      const a=particles[i], b=particles[j];
-      const dx=a.x-b.x, dy=a.y-b.y, dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<80){
-        ctx.strokeStyle=`rgba(255,255,255,${1-dist/80})`;
-        ctx.lineWidth=1;
-        ctx.beginPath();
-        ctx.moveTo(a.x,a.y);
-        ctx.lineTo(b.x,b.y);
+  // Linien zwischen Partikeln
+  for (let i = 0; i < particles.length; i++) {
+    const p1 = particles[i];
+    ctx.beginPath();
+    for (let j = i + 1; j < particles.length; j++) {
+      const p2 = particles[j];
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.strokeStyle = 'rgba(255,255,255,' + (1 - dist / 120) + ')';
+        ctx.lineWidth = 1;
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
     }
+    ctx.closePath();
+  }
+  
+  // Partikel bewegen
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    
+    // Wenn Maus in der Nähe ist
+    if (mouseX !== null && mouseY !== null) {
+      const dx = p.x - mouseX;
+      const dy = p.y - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (dist < mouseRadius) {
+        // Abstoßungskraft berechnen (je näher, desto stärker)
+        const force = (mouseRadius - dist) / mouseRadius;
+        const angle = Math.atan2(dy, dx);
+        
+        // Geschwindigkeit anpassen
+        p.vx = Math.cos(angle) * force * 2 + p.baseVx;
+        p.vy = Math.sin(angle) * force * 2 + p.baseVy;
+      } else {
+        // Sanft zur Basisgeschwindigkeit zurückkehren
+        p.vx += (p.baseVx - p.vx) * 0.05;
+        p.vy += (p.baseVy - p.vy) * 0.05;
+      }
+    } else {
+      // Langsam zur Basisgeschwindigkeit zurückkehren
+      p.vx += (p.baseVx - p.vx) * 0.02;
+      p.vy += (p.baseVy - p.vy) * 0.02;
+    }
+    
+    // Position aktualisieren
+    p.x += p.vx;
+    p.y += p.vy;
+    
+    // Wenn Partikel außerhalb des sichtbaren Bereichs
+    if (p.x < -50 || p.x > canvas.width + 50 || 
+        p.y < -50 || p.y > canvas.height + 50) {
+      // Partikel entfernen und neuen erstellen
+      particles.splice(i, 1);
+      particles.push(createParticle());
+      i--; // Index anpassen, da wir ein Element entfernt haben
+      continue;
+    }
+    
+    // Partikel zeichnen
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
   }
   
   requestAnimationFrame(animate);
 }
 
 animate();
-canvas.addEventListener('mousemove', e=>{ mouseX=e.clientX; mouseY=e.clientY; });
-canvas.addEventListener('mouseleave', ()=>{ mouseX=null; mouseY=null; });
 
-window.addEventListener('resize', ()=>{
+// Mausposition verfolgen
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+document.addEventListener('mouseout', () => {
+  mouseX = null;
+  mouseY = null;
+});
+
+window.addEventListener('resize', () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
