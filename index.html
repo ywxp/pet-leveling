@@ -138,34 +138,44 @@ const form = document.getElementById('levelForm');
 const btn = document.getElementById('sendBtn');
 const statusEl = document.getElementById('status');
 
-form.addEventListener('submit', async (e)=>{
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  btn.disabled=true;
-  statusEl.textContent="Sende …";
-  try{
-    const payload={content:`Neue Anfrage: Roblox ${form.roblox.value}, Discord ${form.discord.value}`};
-    await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    statusEl.textContent="Erfolgreich gesendet ✅";
+  btn.disabled = true;
+  statusEl.textContent = "Sende …";
+
+  try {
+    const embedPayload = {
+      embeds: [
+        {
+          title: `Neue Pet Leveling Anfrage`,
+          color: 0x00ff00, // grün
+          fields: [
+            { name: "Roblox Name", value: form.roblox.value || "–", inline: true },
+            { name: "Discord Name", value: form.discord.value || "–", inline: true },
+            { name: "Welches Pet?", value: form.petWanted.value || "–", inline: true },
+            { name: "Momentanes Level", value: form.petCurrent.value || "–", inline: true },
+            { name: "Ziel Level", value: form.targetLevel.value || "–", inline: true },
+            { name: "Angebot", value: form.offer.value || "–", inline: false }
+          ],
+          timestamp: new Date().toISOString()
+        }
+      ]
+    };
+
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(embedPayload)
+    });
+
+    statusEl.textContent = "Erfolgreich gesendet ✅";
     form.reset();
-  }catch(err){
-    statusEl.textContent="Fehler beim Senden";
-  }finally{btn.disabled=false;}
-});
-
-// Card Neigung
-const formCard = document.getElementById('formCard');
-const creditCard = document.getElementById('creditCard');
-
-function tiltCard(card,e,amplitude=5){
-  const rect = card.getBoundingClientRect();
-  const x = e.clientX - rect.left - rect.width/2;
-  const y = e.clientY - rect.top - rect.height/2;
-  card.style.transform = `rotateX(${-y/rect.height*amplitude}deg) rotateY(${x/rect.width*amplitude}deg)`;
-}
-
-document.addEventListener('mousemove', e=>{
-  tiltCard(formCard,e,5);
-  tiltCard(creditCard,e,5);
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "Fehler beim Senden ❌";
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 formCard.addEventListener('mouseenter', ()=>{ formCard.style.transform='rotateX(0) rotateY(0)'; });
