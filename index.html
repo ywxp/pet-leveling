@@ -221,10 +221,10 @@ canvas.height = window.innerHeight;
 // Mausposition
 let mouseX = null;
 let mouseY = null;
-const mouseRadius = 300;
+const mouseRadius = 90;
 
 // Partikelanzahl dynamisch anpassen
-let particleCount = 222;
+let particleCount = 190;
 if (window.innerWidth < 600) particleCount = 100;
 if (window.innerWidth < 400) particleCount = 60;
 
@@ -235,7 +235,7 @@ function createParticle() {
     y: Math.random() * canvas.height,
     vx: (Math.random() - 0.5) * 0.2,
     vy: (Math.random() - 0.5) * 0.2,
-    size: Math.random() * 2 + 1,
+    size: Math.random() * 4 + 2,
     baseVx: (Math.random() - 0.5) * 0.2,
     baseVy: (Math.random() - 0.5) * 0.2
   };
