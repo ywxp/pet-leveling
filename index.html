@@ -16,8 +16,8 @@
 }
 body {
   margin:0;
-  min-height:100vh; /* statt height:100vh */
-  overflow-y:auto; /* Scrollen erlauben */
+  min-height:100vh;
+  overflow-y:auto;
   overflow-x:hidden;
   font-family: sans-serif;
   background:#0b0b0b;
@@ -51,7 +51,7 @@ canvas {
 }
 h1 { text-align:center; margin-bottom:18px;}
 label { display:block; margin:8px 0 4px; font-size:13px; color:var(--muted);}
-input, textarea {
+input, textarea, select {
   width: calc(100% - 26px);
   padding:10px 12px;
   margin-bottom:10px;
@@ -60,6 +60,10 @@ input, textarea {
   background:transparent;
   color:var(--text);
   outline:none;
+  box-sizing:border-box;
+}
+select {
+  width: 100%;
 }
 .row { display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 .btn {
@@ -94,7 +98,7 @@ input, textarea {
     font-size: 1.2rem;
     margin-bottom: 12px;
   }
-  input, textarea {
+  input, textarea, select {
     font-size: 14px;
     padding: 8px 10px;
   }
@@ -108,6 +112,9 @@ input, textarea {
   }
   .credit-item div {
     font-size: 0.9rem;
+  }
+  #offerSelect {
+    height: 150px;
   }
 }
 
@@ -142,8 +149,28 @@ input, textarea {
         <input id="targetLevel" name="targetLevel" type="text" placeholder="..." required />
       </div>
     </div>
-    <label for="offer">Was gibst du?</label>
-    <input id="offer" name="offer" type="text" placeholder="..." required />
+    <label for="offerSelect">Was gibst du?</label>
+    <div class="row">
+      <div>
+        <select id="offerSelect" name="offerSelect" multiple size="5" required>
+          <option value="Dragonfly">Dragonfly</option>
+          <option value="Mimic Octopus">Mimic Octopus</option>
+          <option value="Red Fox">Red Fox</option>
+          <option value="Disco Bee">Disco Bee</option>
+          <option value="Queen Bee">Queen Bee</option>
+          <option value="French Fry Ferret">French Fry Ferret</option>
+          <option value="Lobster Thermidor">Lobster Thermidor</option>
+          <option value="Raccoon">Raccoon</option>
+          <option value="Fennec Fox">Fennec Fox</option>
+          <option value="Spinosaurus">Spinosaurus</option>
+          <option value="T-Rex">T-Rex</option>
+        </select>
+      </div>
+      <div>
+        <label for="offerAmount">Menge</label>
+        <input id="offerAmount" name="offerAmount" type="number" placeholder="..." min="1" />
+      </div>
+    </div>
     <button id="sendBtn" class="btn" type="submit">Anfrage stellen</button>
     <div id="status" class="status"></div>
   </form>
@@ -180,6 +207,10 @@ form.addEventListener('submit', async (e) => {
   btn.disabled = true;
   statusEl.textContent = "Sende …";
   try {
+    const selectedOptions = Array.from(form.offerSelect.selectedOptions).map(opt => opt.value);
+    const offerText = selectedOptions.join(", ");
+    const amountText = form.offerAmount.value ? `Menge: ${form.offerAmount.value}` : "";
+
     const embedPayload = {
       embeds: [
         {
@@ -191,7 +222,7 @@ form.addEventListener('submit', async (e) => {
             { name: "Welches Pet?", value: form.petWanted.value || "–", inline: true },
             { name: "Momentanes Level", value: form.petCurrent.value || "–", inline: true },
             { name: "Ziel Level", value: form.targetLevel.value || "–", inline: true },
-            { name: "Angebot", value: form.offer.value || "–", inline: false }
+            { name: "Angebot", value: `${offerText} ${amountText}`.trim() || "–", inline: false }
           ],
           timestamp: new Date().toISOString()
         }
@@ -218,12 +249,10 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Mausposition
 let mouseX = null;
 let mouseY = null;
 const mouseRadius = 90;
 
-// Partikelanzahl dynamisch anpassen
 let particleCount = 220;
 if (window.innerWidth < 600) particleCount = 100;
 if (window.innerWidth < 400) particleCount = 60;
@@ -242,7 +271,6 @@ function createParticle() {
 }
 for (let i = 0; i < particleCount; i++) particles.push(createParticle());
 
-// FPS-Überwachung → Partikel reduzieren falls nötig
 let fpsCheck = 0;
 let lastTime = performance.now();
 function checkFPS() {
@@ -263,7 +291,6 @@ checkFPS();
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  // Linien
   for (let i = 0; i < particles.length; i++) {
     const p1 = particles[i];
     ctx.beginPath();
@@ -283,7 +310,6 @@ function animate() {
     ctx.closePath();
   }
   
-  // Partikel bewegen
   for (let i = 0; i < particles.length; i++) {
     const p = particles[i];
     if (mouseX !== null && mouseY !== null) {
@@ -321,7 +347,6 @@ function animate() {
 }
 animate();
 
-// Mausposition
 document.addEventListener('mousemove', e => {
   mouseX = e.clientX;
   mouseY = e.clientY;
